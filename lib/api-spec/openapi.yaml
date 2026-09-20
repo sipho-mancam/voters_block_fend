@@ -1,36 +1,338 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: API specification
+  version: 1.0.0
+  description: Voters Block sports voting API
 servers:
   - url: /api
-    description: Base API path
 tags:
-  - name: health
-    description: Health operations
+  - { name: health }
+  - { name: auth }
+  - { name: public }
+  - { name: polls }
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
-      summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthUser" }
+        "401": { description: Invalid credentials }
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      responses:
+        "204": { description: Logged out }
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthUser" }
+        "401": { description: Not authenticated }
+  /public/active-poll:
+    get:
+      operationId: getActivePoll
+      tags: [public]
+      parameters:
+        - in: query
+          name: deviceId
+          schema: { type: string }
+      responses:
+        "200":
+          description: Active poll or null
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: ["object", "null"]
+                allOf:
+                  - { $ref: "#/components/schemas/PublicPoll" }
+  /public/polls/{pollId}/votes:
+    post:
+      operationId: submitVote
+      tags: [public]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VoteInput" }
+      responses:
+        "200":
+          description: Vote recorded or changed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VoteReceipt" }
+        "409": { description: Poll is closed }
+  /polls:
+    get:
+      operationId: listPolls
+      tags: [polls]
+      responses:
+        "200":
+          description: Poll history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PollSummary" }
+    post:
+      operationId: createPoll
+      tags: [polls]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PollInput" }
+      responses:
+        "201":
+          description: Poll created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PollDetail" }
+        "403": { description: Admin only }
+  /polls/current:
+    get:
+      operationId: getCurrentPoll
+      tags: [polls]
+      responses:
+        "200":
+          description: Current open poll or latest draft
+          content:
+            application/json:
+              schema:
+                type: ["object", "null"]
+                allOf:
+                  - { $ref: "#/components/schemas/PollDetail" }
+  /polls/{pollId}:
+    get:
+      operationId: getPoll
+      tags: [polls]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      responses:
+        "200":
+          description: Poll detail
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PollDetail" }
+        "404": { description: Poll not found }
+  /polls/{pollId}/players:
+    put:
+      operationId: replacePlayers
+      tags: [polls]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlayerUploadInput" }
+      responses:
+        "200":
+          description: Validated player list
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PollDetail" }
+        "422": { description: Invalid upload }
+  /polls/{pollId}/status:
+    patch:
+      operationId: updatePollStatus
+      tags: [polls]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PollStatusInput" }
+      responses:
+        "200":
+          description: Poll status updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PollDetail" }
+        "409": { description: Another poll is open or roster is empty }
+  /polls/{pollId}/results:
+    get:
+      operationId: getPollResults
+      tags: [polls]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      responses:
+        "200":
+          description: Live or historical result breakdown
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PollResults" }
+  /polls/{pollId}/qr:
+    get:
+      operationId: getPollQr
+      tags: [polls]
+      parameters:
+        - { $ref: "#/components/parameters/PollId" }
+      responses:
+        "200":
+          description: QR code PNG
+          content:
+            image/png:
+              schema: { type: string, format: binary }
 components:
+  parameters:
+    PollId:
+      in: path
+      name: pollId
+      required: true
+      schema: { type: integer }
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+    LoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string, minLength: 1, maxLength: 80 }
+        password: { type: string, minLength: 8, maxLength: 200 }
+    AuthUser:
+      type: object
+      required: [id, username, displayName, role]
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        displayName: { type: string }
+        role: { type: string, enum: [ADMIN, OPERATOR] }
+    Player:
+      type: object
+      required: [id, pollId, name, squadNumber]
+      properties:
+        id: { type: integer }
+        pollId: { type: integer }
+        name: { type: string }
+        squadNumber: { type: string }
+        position: { type: ["string", "null"] }
+        team: { type: ["string", "null"] }
+    PublicPoll:
+      type: object
+      required: [id, title, fixture, openedAt, closesAt, players]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        fixture: { type: string }
+        openedAt: { type: string, format: date-time }
+        closesAt: { type: string, format: date-time }
+        players:
+          type: array
+          items: { $ref: "#/components/schemas/Player" }
+        currentPlayerId: { type: ["integer", "null"] }
+    VoteInput:
+      type: object
+      required: [deviceId, playerId]
+      properties:
+        deviceId: { type: string, minLength: 16, maxLength: 120 }
+        playerId: { type: integer }
+    VoteReceipt:
+      type: object
+      required: [pollId, playerId, recordedAt]
+      properties:
+        pollId: { type: integer }
+        playerId: { type: integer }
+        recordedAt: { type: string, format: date-time }
+    PollInput:
+      type: object
+      required: [title, fixture]
+      properties:
+        title: { type: string, minLength: 2, maxLength: 160 }
+        fixture: { type: string, minLength: 2, maxLength: 200 }
+        venue: { type: string, maxLength: 160 }
+    PlayerUploadInput:
+      type: object
+      required: [players]
+      properties:
+        players:
+          type: array
+          minItems: 2
+          maxItems: 100
+          items:
+            type: object
+            required: [name, squadNumber]
+            properties:
+              name: { type: string, minLength: 2, maxLength: 120 }
+              squadNumber: { type: string, minLength: 1, maxLength: 10 }
+              position: { type: string, maxLength: 60 }
+              team: { type: string, maxLength: 120 }
+    PollStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [OPEN, CLOSED] }
+    PollSummary:
+      type: object
+      required: [id, title, fixture, status, createdAt, playerCount, voteCount]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        fixture: { type: string }
+        venue: { type: ["string", "null"] }
+        status: { type: string, enum: [DRAFT, OPEN, CLOSED] }
+        createdAt: { type: string, format: date-time }
+        openedAt: { type: ["string", "null"], format: date-time }
+        closesAt: { type: ["string", "null"], format: date-time }
+        closedAt: { type: ["string", "null"], format: date-time }
+        playerCount: { type: integer }
+        voteCount: { type: integer }
+    PollDetail:
+      allOf:
+        - { $ref: "#/components/schemas/PollSummary" }
+        - type: object
+          required: [players]
+          properties:
+            players:
+              type: array
+              items: { $ref: "#/components/schemas/Player" }
+    ResultItem:
+      type: object
+      required: [playerId, playerName, squadNumber, votes, percentage]
+      properties:
+        playerId: { type: integer }
+        playerName: { type: string }
+        squadNumber: { type: string }
+        votes: { type: integer }
+        percentage: { type: number }
+    PollResults:
+      type: object
+      required: [poll, totalVotes, results]
+      properties:
+        poll: { $ref: "#/components/schemas/PollSummary" }
+        totalVotes: { type: integer }
+        results:
+          type: array
+          items: { $ref: "#/components/schemas/ResultItem" }
 

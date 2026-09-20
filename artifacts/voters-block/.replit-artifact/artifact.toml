@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Voters Block"
+description = "A production-ready sports player voting platform with a mobile public voting experience and secure desktop administration and live operator dashboards."
+version = "1.0.0"
+id = "artifacts/voters-block"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23523
+
+[services.development]
+run = "pnpm --filter @workspace/voters-block run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/voters-block", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/voters-block/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23523"
+BASE_PATH = "/"
