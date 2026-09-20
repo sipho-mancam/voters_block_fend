@@ -1,163 +1,45 @@
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useLogin, useGetCurrentUser } from "@workspace/api-client-react";
+import { useEffect } from "react";
+import { Eye, ShieldCheck, Trophy } from "lucide-react";
 import { useLocation } from "wouter";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Trophy } from "lucide-react";
-
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { Card, CardContent } from "@/components/ui/card";
+import { useStaffSession, type StaffRole } from "@/lib/staff-session";
 
 export default function Login() {
+  const session = useStaffSession();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const { data: user, isLoading: userLoading } = useGetCurrentUser();
-  const loginMutation = useLogin();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
-  });
+  useEffect(() => {
+    if (session.role) setLocation("/dashboard");
+  }, [session.role, setLocation]);
 
-  // Redirect if already logged in
-  if (user && !userLoading) {
+  const enter = (role: StaffRole) => {
+    session.login(role);
     setLocation("/dashboard");
-    return null;
-  }
-
-  const onSubmit = (data: LoginFormValues) => {
-    loginMutation.mutate(
-      { data },
-      {
-        onSuccess: () => {
-          toast({
-            title: "Access Granted",
-            description: "Welcome to Voters Block control center.",
-          });
-          setLocation("/dashboard");
-        },
-        onError: (error: any) => {
-          toast({
-            title: "Authentication Failed",
-            description: error?.message || "Invalid credentials.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col md:flex-row bg-background">
-      {/* Visual Section */}
-      <div className="hidden md:flex flex-1 bg-secondary relative overflow-hidden flex-col justify-between p-12">
-        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjIiIGN5PSIyMiIgcj0iMSIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==')] [background-size:24px_24px]"></div>
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-primary text-primary-foreground p-3 rounded-lg clip-diagonal">
-            <Trophy size={32} className="stroke-[2.5]" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-black text-2xl tracking-tighter uppercase text-secondary-foreground leading-none">Voters</span>
-            <span className="font-black text-2xl tracking-tighter uppercase text-primary leading-none">Block</span>
-          </div>
-        </div>
-        
-        <div className="relative z-10 max-w-md">
-          <h1 className="text-4xl md:text-5xl font-black text-secondary-foreground leading-tight uppercase tracking-tighter mb-4">
-            Broadcast-Ready<br/>Fan Engagement
-          </h1>
-          <p className="text-muted-foreground font-mono text-sm leading-relaxed">
-            SYSTEM STATUS: SECURE.<br/>
-            AWAITING OPERATOR AUTHENTICATION.<br/>
-            LIVE VOTING CONTROL SURFACES.
-          </p>
-        </div>
+    <div className="min-h-[100dvh] bg-background md:grid md:grid-cols-2">
+      <div className="relative hidden overflow-hidden bg-secondary p-12 text-secondary-foreground md:flex md:flex-col md:justify-between">
+        <div className="flex items-center gap-3"><div className="clip-diagonal bg-primary p-3 text-primary-foreground"><Trophy size={30} /></div><div className="text-2xl font-black uppercase leading-none">Voters<br /><span className="text-primary">Block</span></div></div>
+        <div><h1 className="text-5xl font-black uppercase tracking-tighter">Match-day<br />control room</h1><p className="mt-5 max-w-md font-mono text-sm text-muted-foreground">The connected Spring API uses role headers rather than account authentication. Choose the access level assigned to this workstation.</p></div>
       </div>
-
-      {/* Login Form Section */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
-          <div className="md:hidden flex items-center gap-3 mb-12 justify-center">
-            <div className="bg-primary text-primary-foreground p-2 rounded-lg clip-diagonal">
-              <Trophy size={24} className="stroke-[2.5]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-black text-xl tracking-tighter uppercase text-foreground leading-none">Voters</span>
-              <span className="font-black text-xl tracking-tighter uppercase text-primary leading-none">Block</span>
-            </div>
+      <div className="flex items-center justify-center p-6 md:p-12">
+        <div className="w-full max-w-lg">
+          <div className="mb-8 md:hidden"><div className="flex items-center gap-3 text-xl font-black uppercase"><Trophy className="text-primary" /> Voters Block</div></div>
+          <h2 className="text-3xl font-black uppercase tracking-tight">Choose control mode</h2>
+          <p className="mt-2 font-mono text-sm text-muted-foreground">This selection sets the API’s documented X-User-Role header.</p>
+          <div className="mt-8 grid gap-4">
+            <RoleCard icon={<ShieldCheck />} title="Administrator" description="Create polls, upload player lists, and open or close voting." action="Enter as admin" onClick={() => enter("ADMIN")} />
+            <RoleCard icon={<Eye />} title="Live viewer" description="Monitor active polls and live results without administrative controls." action="Enter as viewer" onClick={() => enter("VIEWER")} />
           </div>
-
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold uppercase tracking-tight mb-2">Operator Login</h2>
-            <div className="h-1 w-12 bg-primary mb-4 clip-diagonal"></div>
-            <p className="text-muted-foreground text-sm font-mono">Enter credentials to access the control panel.</p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase font-bold text-muted-foreground">Username</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="operator_1" 
-                        {...field} 
-                        className="font-mono h-12 bg-muted/50 border-muted focus-visible:ring-primary focus-visible:border-primary"
-                        autoComplete="username"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-mono text-xs uppercase font-bold text-muted-foreground">Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="••••••••" 
-                        {...field} 
-                        className="font-mono h-12 bg-muted/50 border-muted focus-visible:ring-primary focus-visible:border-primary"
-                        autoComplete="current-password"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button 
-                type="submit" 
-                className="w-full h-12 font-bold uppercase tracking-widest clip-diagonal hover-elevate transition-all" 
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  "Authenticate"
-                )}
-              </Button>
-            </form>
-          </Form>
+          <p className="mt-6 rounded-md border border-border bg-muted/40 p-3 font-mono text-xs text-muted-foreground">This is role selection, not secure authentication. The supplied backend does not expose a login or session endpoint.</p>
         </div>
       </div>
     </div>
   );
+}
+
+function RoleCard({ icon, title, description, action, onClick }: { icon: React.ReactNode; title: string; description: string; action: string; onClick: () => void }) {
+  return <Card className="transition-colors hover:border-primary/50"><CardContent className="flex items-center gap-4 p-5"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">{icon}</div><div className="flex-1"><h3 className="font-bold uppercase">{title}</h3><p className="mt-1 text-sm text-muted-foreground">{description}</p></div><Button onClick={onClick} className="clip-diagonal uppercase">{action}</Button></CardContent></Card>;
 }

@@ -1,6 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useGetCurrentUser, useLogout } from "@workspace/api-client-react";
-import { LayoutDashboard, History, PlusSquare, LogOut, Loader2, Trophy } from "lucide-react";
+import { LayoutDashboard, PlusSquare, LogOut, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Sidebar,
@@ -16,43 +15,19 @@ import {
 } from "@/components/ui/sidebar";
 import { ReactNode } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { useStaffSession } from "@/lib/staff-session";
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { data: user, isLoading } = useGetCurrentUser();
-  const logoutMutation = useLogout();
+  const session = useStaffSession();
   const [location, setLocation] = useLocation();
-  const { toast } = useToast();
-
   const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        setLocation("/login");
-      },
-      onError: (err) => {
-        toast({
-          title: "Logout failed",
-          description: err.message || "An error occurred",
-          variant: "destructive",
-        });
-      }
-    });
+    session.logout();
+    setLocation("/login");
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
+  if (!session.role) return null;
 
-  if (!user) {
-    // If not logged in, they shouldn't be inside AppLayout. Redirect to login handled by protected route.
-    return null;
-  }
-
-  const isAdmin = user.role === "ADMIN";
+  const isAdmin = session.role === "ADMIN";
 
   return (
     <SidebarProvider>
@@ -91,14 +66,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location === "/history"} tooltip="Poll History">
-                    <Link href="/history" className="flex items-center gap-3">
-                      <History />
-                      <span className="font-medium">History</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </>
             )}
           </SidebarMenu>
@@ -108,12 +75,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3 px-2 py-3 bg-accent/50 rounded-lg mb-2">
             <Avatar className="h-9 w-9 border border-border">
               <AvatarFallback className="bg-primary/20 text-primary font-bold">
-                {user.displayName.substring(0, 2).toUpperCase()}
+                {session.role.slice(0, 2)}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-bold truncate">{user.displayName}</span>
-              <span className="text-xs text-muted-foreground truncate">{user.role}</span>
+              <span className="text-sm font-bold truncate">{session.displayName}</span>
+              <span className="text-xs text-muted-foreground truncate">{session.role}</span>
             </div>
           </div>
           
@@ -121,9 +88,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             variant="ghost" 
             className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
             onClick={handleLogout}
-            disabled={logoutMutation.isPending}
           >
-            {logoutMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <LogOut className="w-4 h-4 mr-2" />}
+            <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
         </SidebarFooter>

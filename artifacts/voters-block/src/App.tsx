@@ -11,7 +11,6 @@ import PublicVoting from '@/pages/home';
 import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import NewPoll from '@/pages/new-poll';
-import History from '@/pages/history';
 import PollDetail from '@/pages/poll-detail';
 import { ProtectedRoute } from '@/components/layout/protected-route';
 
@@ -37,9 +36,6 @@ function Router() {
         </Route>
         <Route path="/polls/new">
           <ProtectedRoute component={NewPoll} requireAdmin />
-        </Route>
-        <Route path="/history">
-          <ProtectedRoute component={History} requireAdmin />
         </Route>
         <Route path="/polls/:id">
           <ProtectedRoute component={PollDetail} />
