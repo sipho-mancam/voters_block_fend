@@ -12,6 +12,7 @@ import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import NewPoll from '@/pages/new-poll';
 import PollDetail from '@/pages/poll-detail';
+import PollHistory from '@/pages/poll-history';
 import { ProtectedRoute } from '@/components/layout/protected-route';
 
 const queryClient = new QueryClient({
@@ -36,6 +37,9 @@ function Router() {
         </Route>
         <Route path="/polls/new">
           <ProtectedRoute component={NewPoll} requireAdmin />
+        </Route>
+        <Route path="/polls/history">
+          <ProtectedRoute component={PollHistory} />
         </Route>
         <Route path="/polls/:id">
           <ProtectedRoute component={PollDetail} />

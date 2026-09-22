@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Archive, ExternalLink, Loader2, MapPin, PlusSquare, Users } from "lucide-react";
+import { Activity, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
 import { Link } from "wouter";
-import { getPollDetails, votersBlockApi, type Poll } from "@/lib/backend-api";
+import { getPollDetails, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -40,10 +40,6 @@ export default function Dashboard() {
   const candidates = results.data?.candidates ?? poll?.candidates ?? [];
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
   const pollDetails = poll ? getPollDetails(results.data ?? poll) : null;
-  const previousPolls = (polls.data ?? [])
-    .filter((item) => !item.active)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
   return (
     <div className="space-y-10 pb-12">
       {poll && pollDetails ? (
@@ -74,8 +70,6 @@ export default function Dashboard() {
       ) : (
         <NoActivePoll isAdmin={isAdmin} />
       )}
-
-      <PollHistory polls={previousPolls} />
     </div>
   );
 }
@@ -87,46 +81,4 @@ function Empty({ title, message }: { title: string; message: string }) {
 
 function NoActivePoll({ isAdmin }: { isAdmin: boolean }) {
   return <section className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card p-8 text-center"><Activity size={40} className="mb-4 text-muted-foreground" /><h1 className="text-2xl font-black uppercase">No active poll</h1><p className="mt-2 max-w-md font-mono text-sm text-muted-foreground">{isAdmin ? "Create a poll and add its candidate list to begin voting." : "There is no live voting session to monitor."}</p>{isAdmin && <Link href="/polls/new" className="clip-diagonal mt-6 inline-flex h-10 items-center gap-2 bg-primary px-4 font-bold uppercase text-primary-foreground"><PlusSquare size={18} /> Create poll</Link>}</section>;
-}
-
-function PollHistory({ polls }: { polls: Poll[] }) {
-  return (
-    <section className="space-y-4">
-      <div className="flex items-end justify-between gap-4">
-        <div><p className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">Archive</p><h2 className="flex items-center gap-2 text-2xl font-black uppercase"><Archive size={23} /> Previous polls</h2></div>
-        <span className="font-mono text-xs uppercase text-muted-foreground">{polls.length} closed</span>
-      </div>
-      {polls.length === 0 ? (
-        <Card><CardContent className="py-10 text-center font-mono text-sm text-muted-foreground">Closed polls will appear here as history.</CardContent></Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {polls.map((poll) => {
-            const details = getPollDetails(poll);
-            const totalVotes = poll.candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
-            return (
-              <Card key={poll.id} className="transition-colors hover:border-primary/40">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Poll #{poll.id} · Closed</p><CardTitle className="mt-1 uppercase">{details.name}</CardTitle></div>
-                    <span className="rounded-full bg-muted px-2 py-1 font-mono text-[10px] font-bold uppercase text-muted-foreground">History</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2 font-mono text-xs text-muted-foreground">
-                    {details.location && <p className="flex items-center gap-2"><MapPin size={14} /> {details.location}</p>}
-                    <p>{new Date(poll.createdAt).toLocaleString()}</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 border-y py-3 text-center">
-                    <div><strong className="text-xl">{poll.candidates.length}</strong><p className="font-mono text-[10px] uppercase text-muted-foreground">Candidates</p></div>
-                    <div><strong className="text-xl">{totalVotes}</strong><p className="font-mono text-[10px] uppercase text-muted-foreground">Votes</p></div>
-                  </div>
-                  <Link href={`/polls/${poll.id}`} className="inline-flex h-9 w-full items-center justify-center rounded-md border text-xs font-bold uppercase hover:border-primary hover:text-primary">View results</Link>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </section>
-  );
 }

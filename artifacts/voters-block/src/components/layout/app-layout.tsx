@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PlusSquare, LogOut } from "lucide-react";
+import { Archive, LayoutDashboard, PlusSquare, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Sidebar,
@@ -46,6 +46,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <Link href="/dashboard" className="flex items-center gap-3">
                   <LayoutDashboard />
                   <span className="font-medium">Dashboard</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location === "/polls/history"} tooltip="Previous Polls">
+                <Link href="/polls/history" className="flex items-center gap-3">
+                  <Archive />
+                  <span className="font-medium">Previous Polls</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
