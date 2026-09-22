@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PlusSquare, LogOut, Trophy } from "lucide-react";
+import { LayoutDashboard, PlusSquare, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   Sidebar,
@@ -16,6 +16,7 @@ import {
 import { ReactNode } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useStaffSession } from "@/lib/staff-session";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const session = useStaffSession();
@@ -33,15 +34,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <Sidebar variant="inset" className="bg-sidebar">
         <SidebarHeader className="pt-6 pb-4 px-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary text-primary-foreground p-2 rounded-md">
-              <Trophy size={24} className="stroke-[2.5]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg tracking-tight uppercase leading-none">Voters</span>
-              <span className="font-bold text-lg tracking-tight uppercase text-muted-foreground leading-none">Block</span>
-            </div>
-          </div>
+          <BrandLogo className="h-12 w-52" />
+          <p className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Voters Block</p>
         </SidebarHeader>
         
         <SidebarContent className="px-4 mt-6">
@@ -98,12 +92,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 lg:hidden">
           <SidebarTrigger className="-ml-2" />
-          <div className="font-bold text-sm tracking-tight uppercase ml-2 flex items-center gap-2">
-            <div className="w-6 h-6 bg-primary text-primary-foreground rounded-sm flex items-center justify-center">
-              <Trophy size={14} className="stroke-[2.5]" />
-            </div>
-            Voters Block
-          </div>
+          <BrandLogo className="ml-2 h-8 w-36" />
         </header>
         <main className="flex-1 overflow-y-auto bg-muted/30">
           <div className="container mx-auto p-4 md:p-8 max-w-7xl h-full">

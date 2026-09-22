@@ -6,6 +6,7 @@ import { votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function PublicVoting() {
   const deviceId = useDeviceId();
@@ -81,10 +82,10 @@ export default function PublicVoting() {
     <div className="min-h-[100dvh] bg-background">
       <header className="sticky top-0 z-10 bg-secondary p-4 text-secondary-foreground shadow-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="clip-diagonal rounded-sm bg-primary p-2 text-primary-foreground"><Trophy size={20} /></div>
-            <div className="flex flex-col text-sm font-bold uppercase leading-none">
-              <span>Man of the</span><span className="text-primary">Match</span>
+          <div className="flex items-center gap-4">
+            <BrandLogo variant="white" className="h-9 w-36 sm:w-44" />
+            <div className="hidden border-l border-white/20 pl-4 text-xs font-bold uppercase leading-tight sm:block">
+              Man of the<br /><span className="text-brand-orange">Match</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -155,11 +156,11 @@ export default function PublicVoting() {
 }
 
 function LoadingState() {
-  return <div className="relative flex min-h-[100dvh] flex-col items-center justify-center"><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div>;
+  return <div className="relative flex min-h-[100dvh] flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="relative flex min-h-[100dvh] items-center justify-center p-6 text-center"><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/50">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div>;
+  return <div className="relative flex min-h-[100dvh] items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div>;
 }
 
 function StaffAccessLink({ compact = false }: { compact?: boolean }) {
