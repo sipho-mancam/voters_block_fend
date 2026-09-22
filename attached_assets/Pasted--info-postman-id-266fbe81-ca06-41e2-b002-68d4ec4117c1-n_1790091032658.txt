@@ -1,0 +1,863 @@
+{
+  "info": {
+    "_postman_id": "266fbe81-ca06-41e2-b002-68d4ec4117c1",
+    "name": "Voters Block API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin Auth Failure (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized for bad admin credentials\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "wrongpassword", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"active\": true, \"name\": \"Test Auth\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Operator Auth Failure (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized for bad operator credentials\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "wrongpassword", "type": "string" },
+            { "key": "username", "value": "operator", "type": "string" }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Missing Auth (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized when no auth is provided\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verify Role Authorization (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 403 Forbidden\", function () {",
+              "    pm.response.to.have.status(403);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision23", "type": "string" },
+            { "key": "username", "value": "operator", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"active\": true}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create a Poll",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response contains nested poll details\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.be.a(\"number\");",
+              "    pm.expect(jsonData.active).to.be.true;",
+              "    ",
+              "    pm.expect(jsonData.details).to.exist;",
+              "    pm.expect(jsonData.details.name).to.eql(\"Community poll\");",
+              "    pm.expect(jsonData.details.image1).to.eql(\"banner.png\");",
+              "    pm.expect(jsonData.details.image2).to.eql(\"map.png\");",
+              "    pm.expect(jsonData.details.location).to.eql(\"Main hall\");",
+              "    ",
+              "    // Save the poll ID to use in subsequent requests",
+              "    pm.collectionVariables.set(\"pollId\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"active\": true,\n    \"name\": \"Community poll\",\n    \"image1\": \"banner.png\",\n    \"image2\": \"map.png\",\n    \"location\": \"Main hall\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Player 1 (Single)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Candidate added successfully\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.name).to.eql(\"Alex Morgan\");",
+              "    pm.expect(jsonData.votes).to.eql(0);",
+              "    ",
+              "    pm.collectionVariables.set(\"candidateOneId\", jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Alex Morgan\",\n    \"metadata\": \"Forward\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls/{{pollId}}/candidates",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls",
+            "{{pollId}}",
+            "candidates"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Multiple Players (Bulk)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Bulk candidates added successfully\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "    pm.expect(jsonData.length).to.eql(2);",
+              "    ",
+              "    pm.collectionVariables.set(\"candidateTwoId\", jsonData[0].id);",
+              "    pm.collectionVariables.set(\"candidateThreeId\", jsonData[1].id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "[\n    {\n        \"name\": \"Jordan Smith\",\n        \"metadata\": \"Midfielder\"\n    },\n    {\n        \"name\": \"Taylor Swift\",\n        \"metadata\": \"Defender\"\n    }\n]",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls/{{pollId}}/candidates/bulk",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls",
+            "{{pollId}}",
+            "candidates",
+            "bulk"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Modify a Player",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Candidate updated successfully\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"candidateOneId\"));",
+              "    pm.expect(jsonData.name).to.eql(\"Alex Morgan Updated\");",
+              "    pm.expect(jsonData.metadata).to.eql(\"Captain\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Alex Morgan Updated\",\n    \"metadata\": \"Captain\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls/{{pollId}}/candidates/{{candidateOneId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls",
+            "{{pollId}}",
+            "candidates",
+            "{{candidateOneId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Remove a Player",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls/{{pollId}}/candidates/{{candidateThreeId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls",
+            "{{pollId}}",
+            "candidates",
+            "{{candidateThreeId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List Active Polls",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Created poll contains remaining active candidates\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var pollId = pm.collectionVariables.get(\"pollId\");",
+              "    ",
+              "    var ourPoll = jsonData.find(p => p.id === pollId);",
+              "    pm.expect(ourPoll).to.not.be.undefined;",
+              "    pm.expect(ourPoll.candidates.length).to.eql(2);",
+              "});",
+              "",
+              "pm.test(\"Returned poll entities include the extended details (name, images, location)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var pollId = pm.collectionVariables.get(\"pollId\");",
+              "    var ourPoll = jsonData.find(p => p.id === pollId);",
+              "    ",
+              "    // API might return details as a nested object or flattened.",
+              "    // Checking for nested details based on the creation response schema:",
+              "    if (ourPoll.details) {",
+              "        pm.expect(ourPoll.details.name).to.eql(\"Community poll\");",
+              "        pm.expect(ourPoll.details.image1).to.eql(\"banner.png\");",
+              "        pm.expect(ourPoll.details.image2).to.eql(\"map.png\");",
+              "        pm.expect(ourPoll.details.location).to.eql(\"Main hall\");",
+              "    } else {",
+              "        // Fallback assertion in case the API flattens the properties in the GET response",
+              "        pm.expect(ourPoll.name).to.eql(\"Community poll\");",
+              "        pm.expect(ourPoll.image1).to.eql(\"banner.png\");",
+              "        pm.expect(ourPoll.image2).to.eql(\"map.png\");",
+              "        pm.expect(ourPoll.location).to.eql(\"Main hall\");",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision23", "type": "string" },
+            { "key": "username", "value": "operator", "type": "string" }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/polls",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cast a Vote",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Vote recorded message received\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.eql(\"Vote recorded or updated\");",
+              "    pm.expect(jsonData.candidateId).to.eql(pm.collectionVariables.get(\"candidateOneId\"));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"candidateId\": {{candidateOneId}},\n    \"deviceId\": \"test-device-999\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/polls/{{pollId}}/votes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls",
+            "{{pollId}}",
+            "votes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Vote with Same Device ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Vote updated message received\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.message).to.eql(\"Vote recorded or updated\");",
+              "    pm.expect(jsonData.candidateId).to.eql(pm.collectionVariables.get(\"candidateTwoId\"));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"candidateId\": {{candidateTwoId}},\n    \"deviceId\": \"test-device-999\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/polls/{{pollId}}/votes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls",
+            "{{pollId}}",
+            "votes"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Read Poll Results",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Results reflect the updated vote\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var candidateOneId = pm.collectionVariables.get(\"candidateOneId\");",
+              "    var candidateTwoId = pm.collectionVariables.get(\"candidateTwoId\");",
+              "    ",
+              "    pm.expect(jsonData.totalVotes).to.eql(1);",
+              "    ",
+              "    var oldChoice = jsonData.candidates.find(c => c.id === candidateOneId);",
+              "    var newChoice = jsonData.candidates.find(c => c.id === candidateTwoId);",
+              "    ",
+              "    pm.expect(oldChoice.votes).to.eql(0);",
+              "    pm.expect(newChoice.votes).to.eql(1);",
+              "});",
+              "",
+              "pm.test(\"Poll results include the extended details (name, images, location)\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.details) {",
+              "        pm.expect(jsonData.details.name).to.eql(\"Community poll\");",
+              "        pm.expect(jsonData.details.image1).to.eql(\"banner.png\");",
+              "        pm.expect(jsonData.details.image2).to.eql(\"map.png\");",
+              "        pm.expect(jsonData.details.location).to.eql(\"Main hall\");",
+              "    } else {",
+              "        pm.expect(jsonData.name).to.eql(\"Community poll\");",
+              "        pm.expect(jsonData.image1).to.eql(\"banner.png\");",
+              "        pm.expect(jsonData.image2).to.eql(\"map.png\");",
+              "        pm.expect(jsonData.location).to.eql(\"Main hall\");",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision23", "type": "string" },
+            { "key": "username", "value": "operator", "type": "string" }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/polls/{{pollId}}/results",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls",
+            "{{pollId}}",
+            "results"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Close the Poll",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Poll is no longer active\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.active).to.be.false;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            { "key": "password", "value": "seb4vision11", "type": "string" },
+            { "key": "username", "value": "admin", "type": "string" }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/polls/{{pollId}}/active?active=false",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "polls",
+            "{{pollId}}",
+            "active"
+          ],
+          "query": [
+            {
+              "key": "active",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Prevent Voting on Closed Poll (Negative Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"Error message explains closed poll\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.error).to.exist;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"candidateId\": {{candidateTwoId}},\n    \"deviceId\": \"new-device-007\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/polls/{{pollId}}/votes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "polls",
+            "{{pollId}}",
+            "votes"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "pollId",
+      "value": ""
+    },
+    {
+      "key": "candidateOneId",
+      "value": ""
+    },
+    {
+      "key": "candidateTwoId",
+      "value": ""
+    },
+    {
+      "key": "candidateThreeId",
+      "value": ""
+    }
+  ]
+}

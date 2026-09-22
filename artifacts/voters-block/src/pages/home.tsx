@@ -20,7 +20,7 @@ export default function PublicVoting() {
 
   const pollsQuery = useQuery({
     queryKey: ["backend", "active-polls", "voter"],
-    queryFn: () => votersBlockApi.listPolls("VOTER"),
+    queryFn: () => votersBlockApi.listPolls(),
     refetchInterval: 15_000,
     retry: 1,
   });

@@ -74,7 +74,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </Avatar>
             <div className="flex flex-col overflow-hidden">
               <span className="text-sm font-bold truncate">{session.displayName}</span>
-              <span className="text-xs text-muted-foreground truncate">{session.role}</span>
+              <span className="text-xs text-muted-foreground truncate">{session.role === "STAFF" ? "OPERATOR" : session.role}</span>
             </div>
           </div>
           

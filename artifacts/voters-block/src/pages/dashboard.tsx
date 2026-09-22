@@ -11,22 +11,23 @@ import { Progress } from "@/components/ui/progress";
 export default function Dashboard() {
   const session = useStaffSession();
   const isAdmin = session.role === "ADMIN";
+  const credentials = session.credentials!;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const polls = useQuery({
     queryKey: ["backend", "active-polls", session.role],
-    queryFn: () => votersBlockApi.listPolls(session.role ?? "VIEWER"),
+    queryFn: () => votersBlockApi.listPolls(credentials),
     refetchInterval: 5_000,
   });
   const poll = polls.data?.find((item) => item.active) ?? null;
   const results = useQuery({
     queryKey: ["backend", "results", poll?.id, session.role],
-    queryFn: () => votersBlockApi.results(poll!.id, session.role ?? "VIEWER"),
+    queryFn: () => votersBlockApi.results(poll!.id, credentials),
     enabled: Boolean(poll),
     refetchInterval: 5_000,
   });
   const closePoll = useMutation({
-    mutationFn: () => votersBlockApi.setActive(poll!.id, false),
+    mutationFn: () => votersBlockApi.setActive(credentials, poll!.id, false),
     onSuccess: () => {
       toast({ title: "Poll closed", description: "The poll is no longer visible to voters." });
       queryClient.invalidateQueries({ queryKey: ["backend"] });

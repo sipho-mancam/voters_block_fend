@@ -12,8 +12,8 @@ Mobile voting and desktop poll-control interface for the existing Voters Block S
 
 - Set `VITE_API_BASE_URL` to the existing Spring API base URL, including `/api` when applicable.
 - If the frontend and API share an origin and `/api` is already routed to Spring, the variable may be omitted; the default is `/api`.
-- The Spring server must allow the frontend origin and the `X-User-Role` request header when hosted on another origin.
-- The frontend sends only the documented roles: `ADMIN`, `VOTER`, and `VIEWER`.
+- The Spring server must allow the frontend origin and the `Authorization` and `Content-Type` request headers when hosted on another origin.
+- Admin and staff/operator API calls use HTTP Basic Auth.
 
 ## Contract source
 
@@ -22,9 +22,12 @@ The implemented contract is documented in:
 - `attached_assets/Pasted--Voters-Block-API-Spring-Boot-REST-backend-for-sports-m_1789900826189.txt`
 - Client adapter: `artifacts/voters-block/src/lib/backend-api.ts`
 
-The supplied API does not provide real login/session endpoints, poll titles/fixtures, closed-poll history, current-vote lookup, or QR generation. The frontend therefore:
+The supplied API does not provide a token/session endpoint, closed-poll history, current-vote lookup, or QR generation. The frontend therefore:
 
-- Uses local workstation role selection for ADMIN and VIEWER mode.
+- Provides separate Admin and Staff sign-in flows.
+- Validates credentials with the API and stores them in browser `sessionStorage` only.
+- Maps Staff access to the API's operator permissions.
+- Adds the stored Basic Auth header to protected API requests.
 - Persists an anonymous voter device ID and the most recent local selection.
 - Generates voter QR PNGs in the browser.
 - Shows active polls only, matching `GET /api/polls`.
@@ -33,7 +36,7 @@ The supplied API does not provide real login/session endpoints, poll titles/fixt
 ## Product routes
 
 - `/` — public active poll and voting
-- `/login` — documented API role selection
+- `/login` — separate Admin and Staff Basic Auth sign-in
 - `/dashboard` — active poll and live results
 - `/polls/new` — admin poll creation and CSV-to-candidate bulk upload
 - `/polls/:id` — active poll detail, results, QR download, and admin close action

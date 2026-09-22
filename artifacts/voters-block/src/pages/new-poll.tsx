@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useStaffSession } from "@/lib/staff-session";
 
 export default function NewPoll() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -17,11 +18,13 @@ export default function NewPoll() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { credentials } = useStaffSession();
 
   const create = useMutation({
     mutationFn: async () => {
-      const poll = await votersBlockApi.createPoll(true);
-      await votersBlockApi.addCandidates(poll.id, players.map((player) => ({
+      if (!credentials) throw new Error("Your admin session has expired");
+      const poll = await votersBlockApi.createPoll(credentials, true);
+      await votersBlockApi.addCandidates(credentials, poll.id, players.map((player) => ({
         name: player.name,
         metadata: [player.position, player.team, player.squadNumber ? `No. ${player.squadNumber}` : ""].filter(Boolean).join(" · "),
       })));

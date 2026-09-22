@@ -1,4 +1,4 @@
-export type ApiRole = "ADMIN" | "VOTER" | "VIEWER";
+import type { StaffCredentials } from "@/lib/staff-session";
 
 export interface Candidate {
   id: number;
@@ -42,14 +42,14 @@ export class BackendError extends Error {
 
 async function request<T>(
   path: string,
-  role: ApiRole,
+  credentials?: StaffCredentials | null,
   init: RequestInit = {},
 ): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       Accept: "application/json",
-      "X-User-Role": role,
+      ...(credentials ? { Authorization: basicAuthHeader(credentials) } : {}),
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...init.headers,
     },
@@ -64,51 +64,65 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-export const votersBlockApi = {
-  listPolls: (role: ApiRole = "VIEWER") =>
-    request<Poll[]>("/polls", role),
+function basicAuthHeader(credentials: StaffCredentials) {
+  const bytes = new TextEncoder().encode(`${credentials.username}:${credentials.password}`);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return `Basic ${window.btoa(binary)}`;
+}
 
-  createPoll: (active = true) =>
-    request<Poll>("/admin/polls", "ADMIN", {
+export const votersBlockApi = {
+  authenticate: (credentials: StaffCredentials) =>
+    request<Poll[]>("/polls", credentials),
+
+  listPolls: (credentials?: StaffCredentials | null) =>
+    request<Poll[]>("/polls", credentials),
+
+  createPoll: (credentials: StaffCredentials, active = true) =>
+    request<Poll>("/admin/polls", credentials, {
       method: "POST",
       body: JSON.stringify({ active }),
     }),
 
   addCandidates: (
+    credentials: StaffCredentials,
     pollId: number,
     candidates: Array<{ name: string; metadata?: string }>,
   ) =>
-    request<Candidate[]>(`/admin/polls/${pollId}/candidates/bulk`, "ADMIN", {
+    request<Candidate[]>(`/admin/polls/${pollId}/candidates/bulk`, credentials, {
       method: "POST",
       body: JSON.stringify(candidates),
     }),
 
   updateCandidate: (
+    credentials: StaffCredentials,
     pollId: number,
     candidateId: number,
     candidate: { name: string; metadata?: string },
   ) =>
-    request<Candidate>(`/admin/polls/${pollId}/candidates/${candidateId}`, "ADMIN", {
+    request<Candidate>(`/admin/polls/${pollId}/candidates/${candidateId}`, credentials, {
       method: "PUT",
       body: JSON.stringify(candidate),
     }),
 
-  removeCandidate: (pollId: number, candidateId: number) =>
-    request<void>(`/admin/polls/${pollId}/candidates/${candidateId}`, "ADMIN", {
+  removeCandidate: (credentials: StaffCredentials, pollId: number, candidateId: number) =>
+    request<void>(`/admin/polls/${pollId}/candidates/${candidateId}`, credentials, {
       method: "DELETE",
     }),
 
   vote: (pollId: number, candidateId: number, deviceId: string) =>
-    request<VoteReceipt>(`/polls/${pollId}/votes`, "VOTER", {
+    request<VoteReceipt>(`/polls/${pollId}/votes`, null, {
       method: "POST",
       body: JSON.stringify({ candidateId, deviceId }),
     }),
 
-  results: (pollId: number, role: ApiRole = "VIEWER") =>
-    request<PollResults>(`/polls/${pollId}/results`, role),
+  results: (pollId: number, credentials: StaffCredentials) =>
+    request<PollResults>(`/polls/${pollId}/results`, credentials),
 
-  setActive: (pollId: number, active: boolean) =>
-    request<Poll>(`/admin/polls/${pollId}/active?active=${active}`, "ADMIN", {
+  setActive: (credentials: StaffCredentials, pollId: number, active: boolean) =>
+    request<Poll>(`/admin/polls/${pollId}/active?active=${active}`, credentials, {
       method: "PATCH",
     }),
 };

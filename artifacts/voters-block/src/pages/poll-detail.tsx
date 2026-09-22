@@ -15,24 +15,25 @@ export default function PollDetail() {
   const pollId = Number(useParams().id);
   const session = useStaffSession();
   const isAdmin = session.role === "ADMIN";
+  const credentials = session.credentials!;
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);
 
   const polls = useQuery({
     queryKey: ["backend", "active-polls", session.role],
-    queryFn: () => votersBlockApi.listPolls(session.role ?? "VIEWER"),
+    queryFn: () => votersBlockApi.listPolls(credentials),
     refetchInterval: 5_000,
   });
   const poll = polls.data?.find((item) => item.id === pollId);
   const results = useQuery({
     queryKey: ["backend", "results", pollId, session.role],
-    queryFn: () => votersBlockApi.results(pollId, session.role ?? "VIEWER"),
+    queryFn: () => votersBlockApi.results(pollId, credentials),
     enabled: Number.isInteger(pollId) && Boolean(poll),
     refetchInterval: 5_000,
   });
   const close = useMutation({
-    mutationFn: () => votersBlockApi.setActive(pollId, false),
+    mutationFn: () => votersBlockApi.setActive(credentials, pollId, false),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["backend"] });
       toast({ title: "Poll closed", description: "Voting has stopped." });
