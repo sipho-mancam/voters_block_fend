@@ -21,7 +21,7 @@ export default function PollDetail() {
   const [downloading, setDownloading] = useState(false);
 
   const polls = useQuery({
-    queryKey: ["backend", "active-polls", session.role],
+    queryKey: ["backend", "polls", session.role],
     queryFn: () => votersBlockApi.listPolls(credentials),
     refetchInterval: 5_000,
   });
@@ -57,7 +57,7 @@ export default function PollDetail() {
   };
 
   if (polls.isLoading) return <div className="flex min-h-60 items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!poll) return <div className="py-20 text-center"><h2 className="text-2xl font-black uppercase">Poll unavailable</h2><p className="mx-auto mt-2 max-w-md font-mono text-sm text-muted-foreground">The supplied API only lists active polls, so closed polls cannot be retrieved.</p><Button asChild variant="link" className="mt-4"><Link href="/dashboard">Return to dashboard</Link></Button></div>;
+  if (!poll) return <div className="py-20 text-center"><h2 className="text-2xl font-black uppercase">Poll unavailable</h2><p className="mx-auto mt-2 max-w-md font-mono text-sm text-muted-foreground">This poll could not be found in the API response.</p><Button asChild variant="link" className="mt-4"><Link href="/dashboard">Return to dashboard</Link></Button></div>;
 
   const candidates = results.data?.candidates ?? poll.candidates;
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
