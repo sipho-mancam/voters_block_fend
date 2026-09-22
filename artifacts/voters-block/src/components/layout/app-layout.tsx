@@ -17,6 +17,7 @@ import { ReactNode } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useStaffSession } from "@/lib/staff-session";
 import { BrandLogo } from "@/components/brand-logo";
+import { SiteFooter } from "@/components/site-footer";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const session = useStaffSession();
@@ -99,6 +100,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {children}
           </div>
         </main>
+        <SiteFooter />
       </SidebarInset>
     </SidebarProvider>
   );

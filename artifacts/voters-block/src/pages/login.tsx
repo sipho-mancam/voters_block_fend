@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useStaffSession, type StaffCredentials, type StaffRole } from "@/lib/staff-session";
 import { votersBlockApi } from "@/lib/backend-api";
 import { BrandLogo } from "@/components/brand-logo";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function Login() {
   const session = useStaffSession();
@@ -35,7 +36,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background md:grid md:grid-cols-2">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
+      <div className="flex-1 md:grid md:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-secondary p-12 text-secondary-foreground md:flex md:flex-col md:justify-between">
         <BrandLogo variant="white" className="h-16 w-72" />
         <div><h1 className="text-5xl font-black uppercase tracking-tighter">Match-day<br />control room</h1><p className="mt-5 max-w-md font-mono text-sm text-muted-foreground">Secure access for administrators and match-day staff. Credentials remain in this browser tab for the current session only.</p></div>
@@ -81,6 +83,8 @@ export default function Login() {
           )}
         </div>
       </div>
+      </div>
+      <SiteFooter />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandLogo } from "@/components/brand-logo";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function PublicVoting() {
   const deviceId = useDeviceId();
@@ -81,7 +82,7 @@ export default function PublicVoting() {
   const pollDetails = getPollDetails(poll);
 
   return (
-    <div className="min-h-[100dvh] bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="sticky top-0 z-10 bg-secondary p-4 text-secondary-foreground shadow-md">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div className="flex items-center gap-4">
@@ -99,7 +100,7 @@ export default function PublicVoting() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl p-4 pb-24 md:p-6">
+      <main className="mx-auto w-full max-w-3xl flex-1 p-4 pb-24 md:p-6">
         <div className="mb-8 mt-4 text-center">
           <p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{pollDetails.location || `Poll #${poll.id}`}</p>
           <h1 className="text-3xl font-black uppercase tracking-tighter md:text-5xl">{pollDetails.name}</h1>
@@ -153,16 +154,17 @@ export default function PublicVoting() {
           })}
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }
 
 function LoadingState() {
-  return <div className="relative flex min-h-[100dvh] flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex flex-1 flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><SiteFooter /></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="relative flex min-h-[100dvh] items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex flex-1 items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div><SiteFooter /></div>;
 }
 
 function StaffAccessLink({ compact = false }: { compact?: boolean }) {
