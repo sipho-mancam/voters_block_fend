@@ -25,4 +25,6 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.development]
-VITE_API_BASE_URL = "http://localhost:5000/api"
+
+[userenv.shared]
+VITE_API_BASE_URL = "http://votersblock-lb-2-1413171271.af-south-1.elb.amazonaws.com/api"
