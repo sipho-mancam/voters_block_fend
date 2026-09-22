@@ -93,8 +93,8 @@ export default function PublicVoting() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-full bg-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-primary sm:flex">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live
+            <div className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 font-mono text-xs font-bold uppercase text-white shadow-sm sm:flex">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-orange" /> Live
             </div>
             <StaffAccessLink compact />
           </div>
@@ -175,7 +175,7 @@ function StaffAccessLink({ compact = false }: { compact?: boolean }) {
       href="/login"
       className={`inline-flex items-center justify-center gap-2 rounded-md border font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
         compact
-          ? "h-9 border-primary/40 bg-primary/10 px-3 text-primary hover:bg-primary hover:text-primary-foreground"
+          ? "h-9 border-white bg-white px-3 text-secondary shadow-sm hover:border-brand-orange hover:bg-brand-orange hover:text-white"
           : "h-10 border-border bg-card px-4 text-foreground shadow-sm hover:border-primary hover:text-primary"
       }`}
     >
