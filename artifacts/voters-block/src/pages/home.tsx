@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Trophy, WifiOff } from "lucide-react";
+import { Check, Loader2, ShieldCheck, Trophy, WifiOff } from "lucide-react";
+import { Link } from "wouter";
 import { votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
@@ -86,8 +87,11 @@ export default function PublicVoting() {
               <span>Man of the</span><span className="text-primary">Match</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-primary">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full bg-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-primary sm:flex">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live
+            </div>
+            <StaffAccessLink compact />
           </div>
         </div>
       </header>
@@ -151,9 +155,25 @@ export default function PublicVoting() {
 }
 
 function LoadingState() {
-  return <div className="flex min-h-[100dvh] flex-col items-center justify-center"><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div>;
+  return <div className="relative flex min-h-[100dvh] flex-col items-center justify-center"><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="flex min-h-[100dvh] items-center justify-center p-6 text-center"><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/50">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div>;
+  return <div className="relative flex min-h-[100dvh] items-center justify-center p-6 text-center"><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/50">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div>;
+}
+
+function StaffAccessLink({ compact = false }: { compact?: boolean }) {
+  return (
+    <Link
+      href="/login"
+      className={`inline-flex items-center justify-center gap-2 rounded-md border font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
+        compact
+          ? "h-9 border-primary/40 bg-primary/10 px-3 text-primary hover:bg-primary hover:text-primary-foreground"
+          : "h-10 border-border bg-card px-4 text-foreground shadow-sm hover:border-primary hover:text-primary"
+      }`}
+    >
+      <ShieldCheck size={16} />
+      <span>{compact ? "Staff" : "Admin / Staff"}</span>
+    </Link>
+  );
 }
