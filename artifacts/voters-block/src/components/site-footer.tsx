@@ -1,5 +1,3 @@
-import { Link } from "wouter";
-
 const socialLinks = [
   {
     label: "Seb4Vision on X",
@@ -28,7 +26,7 @@ const socialLinks = [
   },
 ];
 
-export function SiteFooter({ showContactLink = false }: { showContactLink?: boolean }) {
+export function SiteFooter() {
   return (
     <footer className="border-t border-white/10 bg-secondary px-5 py-7 text-secondary-foreground">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 sm:flex-row">
@@ -49,10 +47,7 @@ export function SiteFooter({ showContactLink = false }: { showContactLink?: bool
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-4 font-mono text-xs text-white/70">
-          {showContactLink && <Link href="/contact" className="font-bold uppercase text-white hover:text-primary">Contact us</Link>}
-          <p>© {new Date().getFullYear()} Seb4Vision. <span>All rights reserved.</span></p>
-        </div>
+        <p className="font-mono text-xs text-white/70">© {new Date().getFullYear()} Seb4Vision. <span>All rights reserved.</span></p>
       </div>
     </footer>
   );

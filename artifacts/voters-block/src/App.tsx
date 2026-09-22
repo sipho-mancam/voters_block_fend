@@ -12,7 +12,6 @@ import Login from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import NewPoll from '@/pages/new-poll';
 import PollDetail from '@/pages/poll-detail';
-import Contact from '@/pages/contact';
 import { ProtectedRoute } from '@/components/layout/protected-route';
 
 const queryClient = new QueryClient({
@@ -29,7 +28,6 @@ function Router() {
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/" component={PublicVoting} />
-        <Route path="/contact" component={Contact} />
         <Route path="/login" component={Login} />
         
         {/* Protected Routes */}

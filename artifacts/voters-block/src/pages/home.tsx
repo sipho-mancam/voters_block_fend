@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, Mail, ShieldCheck, Trophy, WifiOff } from "lucide-react";
+import { Check, Loader2, ShieldCheck, Trophy, WifiOff } from "lucide-react";
 import { Link } from "wouter";
 import { BackendError, getPollDetails, votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteFooter } from "@/components/site-footer";
+import { VoterContactPanel } from "@/components/voter-contact-panel";
 
 export default function PublicVoting() {
   const deviceId = useDeviceId();
@@ -95,7 +96,6 @@ export default function PublicVoting() {
             <div className="hidden items-center gap-2 rounded-full bg-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-primary sm:flex">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live
             </div>
-            <Link href="/contact" className="inline-flex h-9 items-center gap-2 rounded-md border border-white/20 px-3 font-mono text-xs font-bold uppercase text-white hover:border-primary hover:text-primary"><Mail size={15} /><span className="hidden sm:inline">Contact</span></Link>
             <StaffAccessLink compact />
           </div>
         </div>
@@ -155,17 +155,18 @@ export default function PublicVoting() {
           })}
         </div>
       </main>
-      <SiteFooter showContactLink />
+      <VoterContactPanel />
+      <SiteFooter />
     </div>
   );
 }
 
 function LoadingState() {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex flex-1 flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4 flex items-center gap-2"><Link href="/contact" className="font-mono text-xs font-bold uppercase text-primary">Contact</Link><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><SiteFooter showContactLink /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex min-h-[65dvh] flex-1 flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><VoterContactPanel /><SiteFooter /></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex flex-1 items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4 flex items-center gap-2"><Link href="/contact" className="font-mono text-xs font-bold uppercase text-primary">Contact</Link><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div><SiteFooter showContactLink /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex min-h-[65dvh] flex-1 items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div><VoterContactPanel /><SiteFooter /></div>;
 }
 
 function StaffAccessLink({ compact = false }: { compact?: boolean }) {
