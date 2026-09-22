@@ -40,7 +40,7 @@ export default function Login() {
       <div className="flex-1 md:grid md:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-secondary p-12 text-secondary-foreground md:flex md:flex-col md:justify-between">
         <BrandLogo variant="white" className="h-16 w-72" />
-        <div><h1 className="text-5xl font-black uppercase tracking-tighter">Match-day<br />control room</h1><p className="mt-5 max-w-md font-mono text-sm text-muted-foreground">Secure access for administrators and match-day staff. Credentials remain in this browser tab for the current session only.</p></div>
+        <div><h1 className="text-5xl font-black uppercase tracking-tighter">Match-day<br />control room</h1></div>
       </div>
       <div className="flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-lg">
@@ -48,7 +48,6 @@ export default function Login() {
           {!selectedRole ? (
             <>
               <h2 className="text-3xl font-black uppercase tracking-tight">Staff access</h2>
-              <p className="mt-2 font-mono text-sm text-muted-foreground">Choose your access area. Each requires its own API username and password.</p>
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <AccessCard icon={<ShieldCheck />} title="Admin" description="Create polls, upload candidates, and control voting." onClick={() => setSelectedRole("ADMIN")} />
                 <AccessCard icon={<Users />} title="Staff" description="Monitor active polls and live match results." onClick={() => setSelectedRole("STAFF")} />
@@ -78,7 +77,6 @@ export default function Login() {
                   {authenticate.isPending ? <><Loader2 className="mr-2 animate-spin" /> Authenticating</> : `Sign in to ${selectedRole.toLowerCase()}`}
                 </Button>
               </form>
-              <p className="mt-6 rounded-md border border-border bg-muted/40 p-3 font-mono text-xs text-muted-foreground">Credentials are stored in session storage and are removed when you sign out or close this browser tab.</p>
             </>
           )}
         </div>
@@ -95,6 +93,5 @@ function AccessCard({ icon, title, description, onClick }: { icon: React.ReactNo
 
 function authErrorMessage(error: Error) {
   if (error.message === "Request failed (401)") return "Incorrect username or password.";
-  if (error.message === "Failed to fetch") return "The authentication service could not be reached from this browser. Check the API CORS configuration.";
-  return error.message;
+  return "Sign-in is currently unavailable. Please try again.";
 }
