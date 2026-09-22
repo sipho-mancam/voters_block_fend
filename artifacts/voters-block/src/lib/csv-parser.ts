@@ -1,8 +1,9 @@
 export interface ParsedPlayer {
   name: string;
-  squadNumber: string;
+  squadNumber?: string;
   position?: string;
   team?: string;
+  metadata?: string;
 }
 
 export function parsePlayerCsv(csvText: string): { data: ParsedPlayer[]; error?: string } {
@@ -21,9 +22,10 @@ export function parsePlayerCsv(csvText: string): { data: ParsedPlayer[]; error?:
   const numberIdx = headers.findIndex(h => h === 'number' || h === 'squadnumber');
   const posIdx = headers.indexOf('position');
   const teamIdx = headers.indexOf('team');
+  const metadataIdx = headers.indexOf('metadata');
 
-  if (nameIdx === -1 || numberIdx === -1) {
-    return { data: [], error: "CSV must include 'name' and 'squadNumber' headers" };
+  if (nameIdx === -1) {
+    return { data: [], error: "CSV must include a 'name' header" };
   }
 
   const data: ParsedPlayer[] = [];
@@ -39,8 +41,8 @@ export function parsePlayerCsv(csvText: string): { data: ParsedPlayer[]; error?:
     const name = finalValues[nameIdx];
     const squadNumber = finalValues[numberIdx];
 
-    if (!name || !squadNumber) {
-      errors.push(`Row ${i + 1} is missing required fields (name, squadNumber)`);
+    if (!name) {
+      errors.push(`Row ${i + 1} is missing the required name`);
       continue;
     }
 
@@ -49,6 +51,7 @@ export function parsePlayerCsv(csvText: string): { data: ParsedPlayer[]; error?:
       squadNumber,
       position: posIdx !== -1 ? finalValues[posIdx] : undefined,
       team: teamIdx !== -1 ? finalValues[teamIdx] : undefined,
+      metadata: metadataIdx !== -1 ? finalValues[metadataIdx] : undefined,
     });
   }
 

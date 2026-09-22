@@ -14,6 +14,7 @@ Mobile voting and desktop poll-control interface for the existing Voters Block S
 - If the frontend and API share an origin and `/api` is already routed to Spring, the variable may be omitted; the default is `/api`.
 - The Spring server must allow the frontend origin and the `Authorization` and `Content-Type` request headers when hosted on another origin.
 - Admin and staff/operator API calls use HTTP Basic Auth.
+- Voter poll discovery and vote submission are anonymous. The Spring API must permit unauthenticated `GET /api/polls` and `POST /api/polls/{pollId}/votes`.
 
 ## Contract source
 
@@ -28,6 +29,7 @@ The supplied API does not provide a token/session endpoint, closed-poll history,
 - Validates credentials with the API and stores them in browser `sessionStorage` only.
 - Maps Staff access to the API's operator permissions.
 - Adds the stored Basic Auth header to protected API requests.
+- Creates polls with name, location, two optional image references, and candidates entered manually or imported from CSV.
 - Persists an anonymous voter device ID and the most recent local selection.
 - Generates voter QR PNGs in the browser.
 - Shows active polls only, matching `GET /api/polls`.

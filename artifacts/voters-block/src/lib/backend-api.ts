@@ -7,11 +7,23 @@ export interface Candidate {
   votes: number;
 }
 
+export interface PollDetails {
+  name: string;
+  image1: string | null;
+  image2: string | null;
+  location: string;
+}
+
 export interface Poll {
   id: number;
   active: boolean;
   createdAt: string;
   candidates: Candidate[];
+  details?: PollDetails;
+  name?: string;
+  image1?: string | null;
+  image2?: string | null;
+  location?: string;
 }
 
 export interface PollResults {
@@ -19,6 +31,11 @@ export interface PollResults {
   active: boolean;
   totalVotes: number;
   candidates: Candidate[];
+  details?: PollDetails;
+  name?: string;
+  image1?: string | null;
+  image2?: string | null;
+  location?: string;
 }
 
 export interface VoteReceipt {
@@ -80,10 +97,23 @@ export const votersBlockApi = {
   listPolls: (credentials?: StaffCredentials | null) =>
     request<Poll[]>("/polls", credentials),
 
-  createPoll: (credentials: StaffCredentials, active = true) =>
+  createPoll: (
+    credentials: StaffCredentials,
+    poll: { active: boolean; name: string; image1?: string; image2?: string; location: string },
+  ) =>
     request<Poll>("/admin/polls", credentials, {
       method: "POST",
-      body: JSON.stringify({ active }),
+      body: JSON.stringify(poll),
+    }),
+
+  addCandidate: (
+    credentials: StaffCredentials,
+    pollId: number,
+    candidate: { name: string; metadata?: string },
+  ) =>
+    request<Candidate>(`/admin/polls/${pollId}/candidates`, credentials, {
+      method: "POST",
+      body: JSON.stringify(candidate),
     }),
 
   addCandidates: (
@@ -129,4 +159,13 @@ export const votersBlockApi = {
 
 export function publicVotingUrl() {
   return `${window.location.origin}${import.meta.env.BASE_URL}`;
+}
+
+export function getPollDetails(poll: Poll | PollResults): PollDetails {
+  return poll.details ?? {
+    name: poll.name || `Poll #${"id" in poll ? poll.id : poll.pollId}`,
+    image1: poll.image1 ?? null,
+    image2: poll.image2 ?? null,
+    location: poll.location || "",
+  };
 }

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
 import { Link } from "wouter";
-import { votersBlockApi } from "@/lib/backend-api";
+import { getPollDetails, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -41,11 +41,12 @@ export default function Dashboard() {
 
   const candidates = results.data?.candidates ?? poll.candidates;
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
+  const pollDetails = getPollDetails(results.data ?? poll);
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div><h1 className="text-3xl font-black uppercase tracking-tight">Live poll #{poll.id}</h1><p className="font-mono text-sm text-muted-foreground">Refreshing from the Spring API every five seconds</p></div>
+        <div><h1 className="text-3xl font-black uppercase tracking-tight">{pollDetails.name}</h1><p className="font-mono text-sm text-muted-foreground">{pollDetails.location ? `${pollDetails.location} · ` : ""}Refreshing from the Spring API every five seconds</p></div>
         <div className="flex gap-2">
           {isAdmin && <Button variant="destructive" onClick={() => closePoll.mutate()} disabled={closePoll.isPending} className="clip-diagonal uppercase">{closePoll.isPending && <Loader2 className="mr-2 animate-spin" />}Close poll</Button>}
           <Link href={`/polls/${poll.id}`} className="inline-flex h-10 items-center rounded-md border px-4 text-sm font-bold uppercase">Details</Link>

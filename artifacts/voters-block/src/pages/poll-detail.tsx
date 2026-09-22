@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, Loader2, Users } from "lucide-react";
 import QRCode from "qrcode";
 import { Link, useParams } from "wouter";
-import { publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
+import { getPollDetails, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -61,10 +61,11 @@ export default function PollDetail() {
 
   const candidates = results.data?.candidates ?? poll.candidates;
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
+  const pollDetails = getPollDetails(results.data ?? poll);
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center gap-4"><Button asChild variant="ghost" size="icon"><Link href="/dashboard"><ArrowLeft /></Link></Button><div><h1 className="text-3xl font-black uppercase tracking-tight">Poll #{poll.id}</h1><p className="font-mono text-sm text-muted-foreground">Created {new Date(poll.createdAt).toLocaleString()}</p></div></div>
+      <div className="flex items-center gap-4"><Button asChild variant="ghost" size="icon"><Link href="/dashboard"><ArrowLeft /></Link></Button><div><h1 className="text-3xl font-black uppercase tracking-tight">{pollDetails.name}</h1><p className="font-mono text-sm text-muted-foreground">{pollDetails.location ? `${pollDetails.location} · ` : ""}Created {new Date(poll.createdAt).toLocaleString()}</p></div></div>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
         <Button variant="outline" onClick={downloadQr} disabled={downloading} className="clip-diagonal uppercase">{downloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />} Download voter QR</Button>
         {isAdmin && <Button variant="destructive" onClick={() => close.mutate()} disabled={close.isPending} className="clip-diagonal uppercase">Close poll</Button>}

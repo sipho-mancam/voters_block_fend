@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, ShieldCheck, Trophy, WifiOff } from "lucide-react";
 import { Link } from "wouter";
-import { votersBlockApi } from "@/lib/backend-api";
+import { BackendError, getPollDetails, votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -58,11 +58,12 @@ export default function PublicVoting() {
   }
 
   if (pollsQuery.isError) {
+    const unauthorized = pollsQuery.error instanceof BackendError && pollsQuery.error.status === 401;
     return (
       <MessageState
         icon={<WifiOff size={38} />}
-        title="Voting service unavailable"
-        message="We could not reach the match voting server. Check your connection and try again."
+        title={unauthorized ? "Voting access is not public" : "Voting service unavailable"}
+        message={unauthorized ? "The voting API is requiring a login for the public poll list. Voters should not need to sign in; the API must allow anonymous GET requests to /api/polls." : "We could not reach the match voting server. Check your connection and try again."}
         action={() => pollsQuery.refetch()}
       />
     );
@@ -77,6 +78,7 @@ export default function PublicVoting() {
       />
     );
   }
+  const pollDetails = getPollDetails(poll);
 
   return (
     <div className="min-h-[100dvh] bg-background">
@@ -99,8 +101,8 @@ export default function PublicVoting() {
 
       <main className="mx-auto max-w-3xl p-4 pb-24 md:p-6">
         <div className="mb-8 mt-4 text-center">
-          <p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Poll #{poll.id}</p>
-          <h1 className="text-3xl font-black uppercase tracking-tighter md:text-5xl">Choose your player</h1>
+          <p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{pollDetails.location || `Poll #${poll.id}`}</p>
+          <h1 className="text-3xl font-black uppercase tracking-tighter md:text-5xl">{pollDetails.name}</h1>
           <p className="mt-2 font-mono text-sm text-muted-foreground">Your latest selection replaces your previous vote.</p>
         </div>
 
