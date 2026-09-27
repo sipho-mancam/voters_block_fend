@@ -10,15 +10,32 @@ import { BrandLogo } from "@/components/brand-logo";
 import { SiteFooter } from "@/components/site-footer";
 import { VoterContactPanel } from "@/components/voter-contact-panel";
 
+const CURRENT_VOTE_KEY = "voters-block-current-vote";
+
+function readCurrentVote(): number | null {
+  try {
+    const value = window.localStorage.getItem(CURRENT_VOTE_KEY);
+    return value ? Number(value) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCurrentVote(candidateId: number | null): void {
+  try {
+    if (candidateId === null) window.localStorage.removeItem(CURRENT_VOTE_KEY);
+    else window.localStorage.setItem(CURRENT_VOTE_KEY, String(candidateId));
+  } catch {
+    // The current selection still works in memory when browser storage is blocked.
+  }
+}
+
 export default function PublicVoting() {
   const deviceId = useDeviceId();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [pendingCandidate, setPendingCandidate] = useState<number | null>(null);
-  const [currentVote, setCurrentVote] = useState<number | null>(() => {
-    const value = window.localStorage.getItem("voters-block-current-vote");
-    return value ? Number(value) : null;
-  });
+  const [currentVote, setCurrentVote] = useState<number | null>(readCurrentVote);
 
   const pollsQuery = useQuery({
     queryKey: ["backend", "active-polls", "voter"],
@@ -33,7 +50,7 @@ export default function PublicVoting() {
     const belongsToPoll = poll.candidates.some((candidate) => candidate.id === currentVote);
     if (!belongsToPoll) {
       setCurrentVote(null);
-      window.localStorage.removeItem("voters-block-current-vote");
+      saveCurrentVote(null);
     }
   }, [poll, currentVote]);
 
@@ -44,7 +61,7 @@ export default function PublicVoting() {
     },
     onSuccess: (receipt) => {
       setCurrentVote(receipt.candidateId);
-      window.localStorage.setItem("voters-block-current-vote", String(receipt.candidateId));
+      saveCurrentVote(receipt.candidateId);
       setPendingCandidate(null);
       queryClient.invalidateQueries({ queryKey: ["backend", "active-polls"] });
       toast({ title: "Vote recorded", description: receipt.message });
