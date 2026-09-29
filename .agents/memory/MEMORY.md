@@ -1,0 +1,1 @@
+- [Post-merge setup timing](post-merge-timing.md) — pnpm can exceed short timeouts while relinking dependencies even with an unchanged lockfile.
