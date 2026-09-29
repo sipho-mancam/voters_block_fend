@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, Loader2, Users } from "lucide-react";
-import QRCode from "qrcode";
 import { Link, useParams } from "wouter";
-import { candidateSubtitle, getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
+import { candidateSubtitle, getPollDetails, isValidPublicId, votersBlockApi } from "@/lib/backend-api";
+import { downloadVoterQr } from "@/lib/voter-qr";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -49,13 +49,9 @@ export default function PollDetail() {
 
   const downloadQr = async () => {
     try {
-      if (!poll?.publicId) throw new Error("This poll has no public ID, so a voter link cannot be generated.");
+      if (!poll) throw new Error("This poll is unavailable.");
       setDownloading(true);
-      const dataUrl = await QRCode.toDataURL(publicVotingUrl(poll.publicId), { width: 1024, margin: 2, errorCorrectionLevel: "H" });
-      const anchor = document.createElement("a");
-      anchor.href = dataUrl;
-      anchor.download = `voters-block-poll-${pollId}.png`;
-      anchor.click();
+      await downloadVoterQr(poll);
     } catch (error) {
       toast({ title: "QR generation failed", description: (error as Error).message, variant: "destructive" });
     } finally {

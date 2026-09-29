@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
+import { Activity, Download, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
 import { Link } from "wouter";
-import { candidateSubtitle, getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
-import { useStaffSession } from "@/lib/staff-session";
+import { candidateSubtitle, getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi, type Poll } from "@/lib/backend-api";
+import { downloadVoterQr } from "@/lib/voter-qr";
+import { useStaffSession, type StaffCredentials, type StaffRole } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,44 +14,85 @@ export default function Dashboard() {
   const session = useStaffSession();
   const isAdmin = session.role === "ADMIN";
   const credentials = session.credentials!;
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const polls = useQuery({
     queryKey: ["backend", "polls", session.role],
     queryFn: () => votersBlockApi.listPolls(credentials),
     refetchInterval: 5_000,
   });
-  const poll = polls.data?.find((item) => item.active) ?? null;
+  const openPolls = polls.data?.filter((poll) => poll.active) ?? [];
+
+  if (polls.isLoading) return <CenteredLoader />;
+  if (polls.isError) return <Empty title="Backend unavailable" message={(polls.error as Error).message} />;
+
+  return (
+    <div className="space-y-8 pb-12">
+      {openPolls.length ? (
+        <>
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div><p className="font-mono text-xs font-bold uppercase tracking-widest text-primary">Match-day control</p><h1 className="text-4xl font-black uppercase">Open polls</h1></div>
+            <span className="font-mono text-xs text-muted-foreground">{openPolls.length} live</span>
+          </div>
+          {openPolls.map((poll) => (
+            <OpenPollCard key={poll.id} poll={poll} credentials={credentials} role={session.role!} isAdmin={isAdmin} />
+          ))}
+        </>
+      ) : (
+        <NoActivePoll isAdmin={isAdmin} />
+      )}
+    </div>
+  );
+}
+
+function OpenPollCard({ poll, credentials, role, isAdmin }: {
+  poll: Poll;
+  credentials: StaffCredentials;
+  role: StaffRole;
+  isAdmin: boolean;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [downloading, setDownloading] = useState(false);
   const results = useQuery({
-    queryKey: ["backend", "results", poll?.id, session.role],
-    queryFn: () => votersBlockApi.results(poll!.id, credentials),
-    enabled: Boolean(poll),
+    queryKey: ["backend", "results", poll.id, role],
+    queryFn: () => votersBlockApi.results(poll.id, credentials),
     refetchInterval: 5_000,
   });
   const closePoll = useMutation({
-    mutationFn: () => votersBlockApi.setActive(credentials, poll!.id, false),
+    mutationFn: () => votersBlockApi.setActive(credentials, poll.id, false),
     onSuccess: () => {
+      queryClient.setQueryData<Poll[]>(["backend", "polls", role], (current) =>
+        current?.map((item) => item.id === poll.id ? { ...item, active: false } : item));
       toast({ title: "Poll closed", description: "The poll is no longer visible to voters." });
-      queryClient.invalidateQueries({ queryKey: ["backend"] });
+      void queryClient.invalidateQueries({ queryKey: ["backend"] });
     },
     onError: (error: Error) => toast({ title: "Close failed", description: error.message, variant: "destructive" }),
   });
 
-  if (polls.isLoading) return <CenteredLoader />;
-  if (polls.isError) return <Empty title="Backend unavailable" message={(polls.error as Error).message} />;
-  const candidates = results.data?.candidates ?? poll?.candidates ?? [];
+  const downloadQr = async () => {
+    setDownloading(true);
+    try {
+      await downloadVoterQr(poll);
+    } catch (error) {
+      toast({ title: "QR generation failed", description: (error as Error).message, variant: "destructive" });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const candidates = results.data?.candidates ?? poll.candidates;
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
-  const pollDetails = poll ? getPollDetails(results.data ?? poll) : null;
+  const pollDetails = getPollDetails(results.data ?? poll);
+  const canDownloadQr = Boolean(poll.publicId && isValidPublicId(poll.publicId));
+
   return (
-    <div className="space-y-10 pb-12">
-      {poll && pollDetails ? (
-        <section className="space-y-6">
+    <section className="space-y-6" aria-label={`${pollDetails.name} poll`}>
           <div className="broadcast-panel broadcast-rule relative flex flex-col justify-between gap-6 overflow-hidden p-6 sm:flex-row sm:items-end md:p-8">
-            <div className="relative z-10"><p className="mb-3 flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/65"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live poll</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight text-white md:text-6xl">{pollDetails.name}</h1><p className="mt-4 font-mono text-xs text-white/55">{pollDetails.location ? `${pollDetails.location} · ` : ""}Results refresh every five seconds</p></div>
+             <div className="relative z-10"><p className="mb-3 flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/65"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live poll #{poll.id}</p><h2 className="text-5xl font-black uppercase leading-none tracking-tight text-white md:text-6xl">{pollDetails.name}</h2><p className="mt-4 font-mono text-xs text-white/55">{pollDetails.location ? `${pollDetails.location} · ` : ""}Results refresh every five seconds</p></div>
             <div className="relative z-10 flex flex-wrap gap-2">
-              {isAdmin && <Button variant="destructive" onClick={() => closePoll.mutate()} disabled={closePoll.isPending} className="clip-diagonal uppercase">{closePoll.isPending && <Loader2 className="mr-2 animate-spin" />}Close poll</Button>}
+               {isAdmin && <Button variant="destructive" onClick={() => closePoll.mutate()} disabled={closePoll.isPending} className="clip-diagonal uppercase">{closePoll.isPending && <Loader2 className="mr-2 animate-spin" />}Close poll</Button>}
+               {isAdmin && <Button variant="outline" onClick={downloadQr} disabled={downloading || !canDownloadQr} title={canDownloadQr ? undefined : "This poll has no valid public ID"} className="clip-diagonal uppercase">{downloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />} Download voter QR</Button>}
               <Link href={`/polls/${poll.id}`} className="inline-flex h-10 items-center border border-white/35 px-4 text-xs font-bold uppercase text-white hover:bg-white hover:text-secondary">Details</Link>
-              {poll.publicId && isValidPublicId(poll.publicId) && <a href={publicVotingUrl(poll.publicId)} target="_blank" rel="noreferrer" aria-label="Open this poll's public voting page" className="inline-flex h-10 w-10 items-center justify-center border border-white/35 text-white hover:bg-white hover:text-secondary"><ExternalLink size={18} /></a>}
+               {canDownloadQr && poll.publicId && <a href={publicVotingUrl(poll.publicId)} target="_blank" rel="noreferrer" aria-label={`Open ${pollDetails.name} public voting page`} className="inline-flex h-10 w-10 items-center justify-center border border-white/35 text-white hover:bg-white hover:text-secondary"><ExternalLink size={18} /></a>}
             </div>
             <span aria-hidden="true" className="pointer-events-none absolute -bottom-20 right-12 font-display text-[16rem] font-black leading-none text-white/[0.04]">S</span>
         </div>
@@ -57,6 +100,7 @@ export default function Dashboard() {
             <Card className="rounded-sm border-t-4 border-t-primary md:col-span-2">
               <CardHeader><CardTitle className="flex items-center justify-between uppercase">Current standings <span className="h-3 w-3 animate-pulse rounded-full bg-primary" /></CardTitle></CardHeader>
               <CardContent>
+                 {results.isError && <p className="mb-4 text-sm text-destructive">Live results unavailable: {(results.error as Error).message}</p>}
                 {results.isLoading ? <CenteredLoader /> : candidates.length === 0 ? <p className="py-12 text-center font-mono text-muted-foreground">No candidates have been uploaded.</p> : (
                   <div className="space-y-6">{[...candidates].sort((a, b) => b.votes - a.votes).map((candidate, index) => {
                     const percentage = total ? candidate.votes / total * 100 : 0;
@@ -67,11 +111,7 @@ export default function Dashboard() {
             </Card>
             <Card className="rounded-sm bg-secondary text-white"><CardHeader><CardTitle className="text-sm uppercase text-white/60">Total votes</CardTitle></CardHeader><CardContent><p className="font-display text-7xl font-black leading-none text-white">{total}</p><p className="mt-5 flex items-center gap-2 font-mono text-xs text-white/50"><Users size={14} className="text-primary" /> LIVE TALLY</p></CardContent></Card>
           </div>
-        </section>
-      ) : (
-        <NoActivePoll isAdmin={isAdmin} />
-      )}
-    </div>
+    </section>
   );
 }
 

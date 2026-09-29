@@ -40,7 +40,7 @@ The original supplied API contract did not describe a token/session endpoint, cu
 - `/` — public active poll and voting
 - `/:publicId` — public voting for the matching active UUID poll only
 - `/login` — separate Admin and Staff Basic Auth sign-in
-- `/dashboard` — active poll and live results
+- `/dashboard` — all open polls with live results; admins can close each poll and download its voter QR
 - `/polls/new` — admin poll creation and CSV-to-candidate bulk upload
 - `/polls/:id` — poll detail, results, QR download for active polls, and admin close action
 - `/polls/history` — staff/admin previous polls
