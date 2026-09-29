@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { BrandLogo } from "@/components/brand-logo";
 import { SiteFooter } from "@/components/site-footer";
-import { VoterContactPanel } from "@/components/voter-contact-panel";
 
 const CURRENT_VOTE_KEY = "voters-block-current-vote";
 
@@ -178,18 +177,17 @@ export default function PublicVoting() {
         </div>
         </div>
       </main>
-      <VoterContactPanel />
       <SiteFooter />
     </div>
   );
 }
 
 function LoadingState() {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-20"><div className="mb-8 h-3 w-28 animate-pulse bg-muted" /><div className="mb-5 h-14 w-3/4 animate-pulse bg-muted" /><div className="mb-12 h-5 w-1/2 animate-pulse bg-muted" /><div className="space-y-3">{[0, 1, 2].map((item) => <div key={item} className="h-20 animate-pulse border border-border bg-card" />)}</div><p className="mt-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><VoterContactPanel /><SiteFooter /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-20"><div className="mb-8 h-3 w-28 animate-pulse bg-muted" /><div className="mb-5 h-14 w-3/4 animate-pulse bg-muted" /><div className="mb-12 h-5 w-1/2 animate-pulse bg-muted" /><div className="space-y-3">{[0, 1, 2].map((item) => <div key={item} className="h-20 animate-pulse border border-border bg-card" />)}</div><p className="mt-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><SiteFooter /></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="flex min-h-[55dvh] flex-1 items-center justify-center p-6 text-center"><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center bg-secondary text-primary">{icon}</div><p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-primary">Match-day voting</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight">{title}</h1><p className="mt-5 text-sm leading-relaxed text-muted-foreground">{message}</p>{action && <button className="mt-6 bg-primary px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90" onClick={action}>Try again</button>}</div></div><VoterContactPanel /><SiteFooter /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="flex min-h-[55dvh] flex-1 items-center justify-center p-6 text-center"><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center bg-secondary text-primary">{icon}</div><p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-primary">Match-day voting</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight">{title}</h1><p className="mt-5 text-sm leading-relaxed text-muted-foreground">{message}</p>{action && <button className="mt-6 bg-primary px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90" onClick={action}>Try again</button>}</div></div><SiteFooter /></div>;
 }
 
 function StaffAccessLink({ compact = false }: { compact?: boolean }) {
