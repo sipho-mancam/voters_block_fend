@@ -16,6 +16,7 @@ export interface PollDetails {
 
 export interface Poll {
   id: number;
+  publicId?: string;
   active: boolean;
   createdAt: string;
   candidates: Candidate[];
@@ -97,6 +98,12 @@ export const votersBlockApi = {
   listPolls: (credentials?: StaffCredentials | null) =>
     request<Poll[]>("/polls", credentials),
 
+  pollByPublicId: (publicId: string) =>
+    request<Poll>(`/polls/${encodeURIComponent(publicId)}`),
+
+  pollHistory: (credentials: StaffCredentials) =>
+    request<Poll[]>("/polls/history", credentials),
+
   createPoll: (
     credentials: StaffCredentials,
     poll: { active: boolean; name: string; image1?: string; image2?: string; location: string },
@@ -157,8 +164,13 @@ export const votersBlockApi = {
     }),
 };
 
-export function publicVotingUrl() {
-  return `${window.location.origin}${import.meta.env.BASE_URL}`;
+export function isValidPublicId(publicId: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(publicId);
+}
+
+export function publicVotingUrl(publicId: string) {
+  if (!isValidPublicId(publicId)) throw new Error("This poll has no valid public ID.");
+  return `${window.location.origin}${import.meta.env.BASE_URL}${encodeURIComponent(publicId)}`;
 }
 
 export function getPollDetails(poll: Poll | PollResults): PollDetails {

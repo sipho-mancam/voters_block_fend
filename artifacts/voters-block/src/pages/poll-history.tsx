@@ -9,8 +9,8 @@ export default function PollHistory() {
   const session = useStaffSession();
   const credentials = session.credentials!;
   const polls = useQuery({
-    queryKey: ["backend", "polls", session.role],
-    queryFn: () => votersBlockApi.listPolls(credentials),
+    queryKey: ["backend", "polls-history", session.role],
+    queryFn: () => votersBlockApi.pollHistory(credentials),
     refetchInterval: 15_000,
   });
 

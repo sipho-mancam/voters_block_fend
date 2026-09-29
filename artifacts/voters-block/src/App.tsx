@@ -44,6 +44,7 @@ function Router() {
         <Route path="/polls/:id">
           <ProtectedRoute component={PollDetail} />
         </Route>
+        <Route path="/:publicId" component={PublicVoting} />
         
         <Route component={NotFound} />
       </Switch>

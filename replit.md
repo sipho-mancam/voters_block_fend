@@ -14,7 +14,7 @@ Mobile voting and desktop poll-control interface for the existing Voters Block S
 - If the frontend and API share an origin and `/api` is already routed to Spring, the variable may be omitted; the default is `/api`.
 - The Spring server must allow the frontend origin and the `Authorization` and `Content-Type` request headers when hosted on another origin.
 - Admin and staff/operator API calls use HTTP Basic Auth.
-- Voter poll discovery and vote submission are anonymous. The Spring API must permit unauthenticated `GET /api/polls` and `POST /api/polls/{pollId}/votes`.
+- Voter poll discovery and vote submission are anonymous. The Spring API must permit unauthenticated `GET /api/polls`, `GET /api/polls/{publicId}`, and `POST /api/polls/{pollId}/votes`. The UUID lookup must return the requested poll including `publicId` and `active`.
 
 ## Contract source
 
@@ -23,7 +23,7 @@ The implemented contract is documented in:
 - `attached_assets/Pasted--Voters-Block-API-Spring-Boot-REST-backend-for-sports-m_1789900826189.txt`
 - Client adapter: `artifacts/voters-block/src/lib/backend-api.ts`
 
-The supplied API does not provide a token/session endpoint, closed-poll history, current-vote lookup, or QR generation. The frontend therefore:
+The original supplied API contract did not describe a token/session endpoint, current-vote lookup, or QR generation. The frontend therefore:
 
 - Provides separate Admin and Staff sign-in flows.
 - Validates credentials with the API and stores them in browser `sessionStorage` only.
@@ -31,17 +31,19 @@ The supplied API does not provide a token/session endpoint, closed-poll history,
 - Adds the stored Basic Auth header to protected API requests.
 - Creates polls with name, location, two optional image references, and candidates entered manually or imported from CSV.
 - Persists an anonymous voter device ID and the most recent local selection.
-- Generates voter QR PNGs in the browser.
-- Shows active polls only, matching `GET /api/polls`.
+- Generates voter QR PNGs in the browser using each poll's `publicId`; a QR opens `/<publicId>` and only displays a matching active poll.
+- Uses `GET /api/polls/history` for previous polls, and `GET /api/polls` for the main active poll page.
 - Does not claim that local role selection is secure authentication.
 
 ## Product routes
 
 - `/` — public active poll and voting
+- `/:publicId` — public voting for the matching active UUID poll only
 - `/login` — separate Admin and Staff Basic Auth sign-in
 - `/dashboard` — active poll and live results
 - `/polls/new` — admin poll creation and CSV-to-candidate bulk upload
-- `/polls/:id` — active poll detail, results, QR download, and admin close action
+- `/polls/:id` — poll detail, results, QR download for active polls, and admin close action
+- `/polls/history` — staff/admin previous polls
 
 ## CSV upload
 

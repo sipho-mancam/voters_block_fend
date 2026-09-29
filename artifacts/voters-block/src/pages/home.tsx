@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, ShieldCheck, Trophy, WifiOff } from "lucide-react";
-import { Link } from "wouter";
-import { BackendError, getPollDetails, votersBlockApi } from "@/lib/backend-api";
+import { Link, useParams } from "wouter";
+import { BackendError, getPollDetails, isValidPublicId, votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,47 +11,66 @@ import { SiteFooter } from "@/components/site-footer";
 
 const CURRENT_VOTE_KEY = "voters-block-current-vote";
 
-function readCurrentVote(): number | null {
+function readCurrentVote(pollId: number): number | null {
   try {
-    const value = window.localStorage.getItem(CURRENT_VOTE_KEY);
+    const value = window.localStorage.getItem(`${CURRENT_VOTE_KEY}-${pollId}`);
     return value ? Number(value) : null;
   } catch {
     return null;
   }
 }
 
-function saveCurrentVote(candidateId: number | null): void {
+function saveCurrentVote(pollId: number, candidateId: number | null): void {
   try {
-    if (candidateId === null) window.localStorage.removeItem(CURRENT_VOTE_KEY);
-    else window.localStorage.setItem(CURRENT_VOTE_KEY, String(candidateId));
+    if (candidateId === null) window.localStorage.removeItem(`${CURRENT_VOTE_KEY}-${pollId}`);
+    else window.localStorage.setItem(`${CURRENT_VOTE_KEY}-${pollId}`, String(candidateId));
   } catch {
     // The current selection still works in memory when browser storage is blocked.
   }
 }
 
 export default function PublicVoting() {
+  const { publicId } = useParams<{ publicId?: string }>();
+  const validPublicId = !publicId || isValidPublicId(publicId);
   const deviceId = useDeviceId();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [pendingCandidate, setPendingCandidate] = useState<number | null>(null);
-  const [currentVote, setCurrentVote] = useState<number | null>(readCurrentVote);
+  const [currentVote, setCurrentVote] = useState<number | null>(null);
+  const [votePollId, setVotePollId] = useState<number | null>(null);
 
   const pollsQuery = useQuery({
     queryKey: ["backend", "active-polls", "voter"],
     queryFn: () => votersBlockApi.listPolls(),
+    enabled: !publicId,
     refetchInterval: 15_000,
     retry: 1,
   });
-  const poll = pollsQuery.data?.find((item) => item.active) ?? null;
+  const linkedPollQuery = useQuery({
+    queryKey: ["backend", "public-poll", publicId],
+    queryFn: () => votersBlockApi.pollByPublicId(publicId!),
+    enabled: Boolean(publicId && validPublicId),
+    refetchInterval: 15_000,
+    retry: 1,
+  });
+  const linkedPoll = linkedPollQuery.data;
+  const poll = publicId
+    ? linkedPoll?.active && linkedPoll.publicId?.toLowerCase() === publicId.toLowerCase() ? linkedPoll : null
+    : pollsQuery.data?.find((item) => item.active) ?? null;
 
   useEffect(() => {
-    if (!poll || currentVote === null) return;
+    setVotePollId(poll?.id ?? null);
+    setCurrentVote(poll ? readCurrentVote(poll.id) : null);
+  }, [poll?.id]);
+
+  useEffect(() => {
+    if (!poll || votePollId !== poll.id || currentVote === null) return;
     const belongsToPoll = poll.candidates.some((candidate) => candidate.id === currentVote);
     if (!belongsToPoll) {
       setCurrentVote(null);
-      saveCurrentVote(null);
+      saveCurrentVote(poll.id, null);
     }
-  }, [poll, currentVote]);
+  }, [poll, currentVote, votePollId]);
 
   const voteMutation = useMutation({
     mutationFn: ({ pollId, candidateId }: { pollId: number; candidateId: number }) => {
@@ -59,8 +78,9 @@ export default function PublicVoting() {
       return votersBlockApi.vote(pollId, candidateId, deviceId);
     },
     onSuccess: (receipt) => {
+      setVotePollId(receipt.pollId);
       setCurrentVote(receipt.candidateId);
-      saveCurrentVote(receipt.candidateId);
+      saveCurrentVote(receipt.pollId, receipt.candidateId);
       setPendingCandidate(null);
       queryClient.invalidateQueries({ queryKey: ["backend", "active-polls"] });
       toast({ title: "Vote recorded", description: receipt.message });
@@ -71,18 +91,25 @@ export default function PublicVoting() {
     },
   });
 
-  if (!deviceId || pollsQuery.isLoading) {
+  const activeQuery = publicId ? linkedPollQuery : pollsQuery;
+  if (!validPublicId) {
+    return <MessageState icon={<Trophy size={40} />} title="Invalid poll link" message="This voting link is not a valid poll ID." />;
+  }
+  if (!deviceId || activeQuery.isLoading || activeQuery.isPending) {
     return <LoadingState />;
   }
 
-  if (pollsQuery.isError) {
-    const unauthorized = pollsQuery.error instanceof BackendError && pollsQuery.error.status === 401;
+  if (activeQuery.isError) {
+    if (publicId && activeQuery.error instanceof BackendError && activeQuery.error.status === 404) {
+      return <MessageState icon={<Trophy size={40} />} title="Poll unavailable" message="This poll link does not match an active poll. Check the QR code or ask for a current link." />;
+    }
+    const unauthorized = activeQuery.error instanceof BackendError && activeQuery.error.status === 401;
     return (
       <MessageState
         icon={<WifiOff size={38} />}
         title={unauthorized ? "Voting access is not public" : "Voting service unavailable"}
-        message={unauthorized ? "The voting API is requiring a login for the public poll list. Voters should not need to sign in; the API must allow anonymous GET requests to /api/polls." : "We could not reach the match voting server. Check your connection and try again."}
-        action={() => pollsQuery.refetch()}
+        message={unauthorized ? "The voting API is requiring a login for this public poll. Voters should not need to sign in." : "We could not reach the match voting server. Check your connection and try again."}
+        action={() => activeQuery.refetch()}
       />
     );
   }
@@ -91,8 +118,8 @@ export default function PublicVoting() {
     return (
       <MessageState
         icon={<Trophy size={40} />}
-        title="No active poll"
-        message="There is currently no Man of the Match vote open. Please check back during the match."
+        title={publicId ? "Poll unavailable" : "No active poll"}
+        message={publicId ? "This poll link does not match an active poll. Check the QR code or ask for a current link." : "There is currently no Man of the Match vote open. Please check back during the match."}
       />
     );
   }
@@ -128,7 +155,7 @@ export default function PublicVoting() {
         </div>
         <div className="mx-auto max-w-3xl px-4 pb-20 pt-7 md:px-6 md:pt-10">
         <div className="mb-5 flex items-end justify-between gap-3"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">The lineup</p><h2 className="text-3xl font-black uppercase leading-none">Cast your vote</h2></div><span className="font-mono text-[11px] text-muted-foreground">{poll.candidates.length} candidates</span></div>
-        {currentVote !== null && (
+        {votePollId === poll.id && currentVote !== null && (
           <div className="mb-6 flex gap-3 border-l-4 border-primary bg-primary/10 p-4">
             <Check className="mt-0.5 text-primary" />
             <div><p className="font-bold uppercase">Vote registered</p><p className="font-mono text-xs text-muted-foreground">You can change it while voting remains open.</p></div>
@@ -137,7 +164,7 @@ export default function PublicVoting() {
 
         <div className="space-y-3">
           {poll.candidates.map((candidate, index) => {
-            const selected = currentVote === candidate.id;
+            const selected = votePollId === poll.id && currentVote === candidate.id;
             const pending = voteMutation.isPending && pendingCandidate === candidate.id;
             return (
               <Card

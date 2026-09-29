@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
 import { Link } from "wouter";
-import { getPollDetails, votersBlockApi } from "@/lib/backend-api";
+import { getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ export default function Dashboard() {
             <div className="relative z-10 flex flex-wrap gap-2">
               {isAdmin && <Button variant="destructive" onClick={() => closePoll.mutate()} disabled={closePoll.isPending} className="clip-diagonal uppercase">{closePoll.isPending && <Loader2 className="mr-2 animate-spin" />}Close poll</Button>}
               <Link href={`/polls/${poll.id}`} className="inline-flex h-10 items-center border border-white/35 px-4 text-xs font-bold uppercase text-white hover:bg-white hover:text-secondary">Details</Link>
-              <a href="/" target="_blank" rel="noreferrer" aria-label="Open public voting page" className="inline-flex h-10 w-10 items-center justify-center border border-white/35 text-white hover:bg-white hover:text-secondary"><ExternalLink size={18} /></a>
+              {poll.publicId && isValidPublicId(poll.publicId) && <a href={publicVotingUrl(poll.publicId)} target="_blank" rel="noreferrer" aria-label="Open this poll's public voting page" className="inline-flex h-10 w-10 items-center justify-center border border-white/35 text-white hover:bg-white hover:text-secondary"><ExternalLink size={18} /></a>}
             </div>
             <span aria-hidden="true" className="pointer-events-none absolute -bottom-20 right-12 font-display text-[16rem] font-black leading-none text-white/[0.04]">S</span>
         </div>

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, Loader2, Users } from "lucide-react";
 import QRCode from "qrcode";
 import { Link, useParams } from "wouter";
-import { getPollDetails, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
+import { getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,13 @@ export default function PollDetail() {
     queryFn: () => votersBlockApi.listPolls(credentials),
     refetchInterval: 5_000,
   });
-  const poll = polls.data?.find((item) => item.id === pollId);
+  const history = useQuery({
+    queryKey: ["backend", "polls-history", session.role],
+    queryFn: () => votersBlockApi.pollHistory(credentials),
+    enabled: !polls.isLoading && !polls.data?.some((item) => item.id === pollId),
+    refetchInterval: 15_000,
+  });
+  const poll = polls.data?.find((item) => item.id === pollId) ?? history.data?.find((item) => item.id === pollId);
   const results = useQuery({
     queryKey: ["backend", "results", pollId, session.role],
     queryFn: () => votersBlockApi.results(pollId, credentials),
@@ -43,8 +49,9 @@ export default function PollDetail() {
 
   const downloadQr = async () => {
     try {
+      if (!poll?.publicId) throw new Error("This poll has no public ID, so a voter link cannot be generated.");
       setDownloading(true);
-      const dataUrl = await QRCode.toDataURL(publicVotingUrl(), { width: 1024, margin: 2, errorCorrectionLevel: "H" });
+      const dataUrl = await QRCode.toDataURL(publicVotingUrl(poll.publicId), { width: 1024, margin: 2, errorCorrectionLevel: "H" });
       const anchor = document.createElement("a");
       anchor.href = dataUrl;
       anchor.download = `voters-block-poll-${pollId}.png`;
@@ -56,8 +63,8 @@ export default function PollDetail() {
     }
   };
 
-  if (polls.isLoading) return <div className="flex min-h-60 items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!poll) return <div className="py-20 text-center"><h2 className="text-2xl font-black uppercase">Poll unavailable</h2><p className="mx-auto mt-2 max-w-md font-mono text-sm text-muted-foreground">This poll could not be found in the API response.</p><Button asChild variant="link" className="mt-4"><Link href="/dashboard">Return to dashboard</Link></Button></div>;
+  if (polls.isLoading || history.isLoading) return <div className="flex min-h-60 items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  if (!poll) return <div className="py-20 text-center"><h2 className="text-2xl font-black uppercase">Poll unavailable</h2><p className="mx-auto mt-2 max-w-md font-mono text-sm text-muted-foreground">{(history.error ?? polls.error)?.message ?? "This poll could not be found in the API response."}</p><Button asChild variant="link" className="mt-4"><Link href="/dashboard">Return to dashboard</Link></Button></div>;
 
   const candidates = results.data?.candidates ?? poll.candidates;
   const total = results.data?.totalVotes ?? candidates.reduce((sum, item) => sum + item.votes, 0);
@@ -67,7 +74,7 @@ export default function PollDetail() {
     <div className="space-y-6 pb-12">
       <div className="broadcast-panel broadcast-rule flex items-start gap-4 p-6 md:p-8"><Button asChild variant="ghost" size="icon" className="shrink-0 text-white hover:bg-white/15 hover:text-white"><Link href="/dashboard"><ArrowLeft /></Link></Button><div><p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">Poll details / #{poll.id}</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight text-white md:text-6xl">{pollDetails.name}</h1><p className="mt-4 font-mono text-xs text-white/55">{pollDetails.location ? `${pollDetails.location} · ` : ""}Created {new Date(poll.createdAt).toLocaleString()}</p></div></div>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
-        <Button variant="outline" onClick={downloadQr} disabled={downloading} className="clip-diagonal uppercase">{downloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />} Download voter QR</Button>
+        <Button variant="outline" onClick={downloadQr} disabled={downloading || !poll.active || !poll.publicId || !isValidPublicId(poll.publicId)} title={!poll.publicId || !isValidPublicId(poll.publicId) ? "Poll has no valid public ID" : !poll.active ? "This poll is closed" : undefined} className="clip-diagonal uppercase">{downloading ? <Loader2 className="mr-2 animate-spin" /> : <Download className="mr-2" />} Download voter QR</Button>
         {isAdmin && <Button variant="destructive" onClick={() => close.mutate()} disabled={close.isPending} className="clip-diagonal uppercase">Close poll</Button>}
       </div>
       <div className="grid gap-6 xl:grid-cols-3">
