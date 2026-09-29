@@ -116,7 +116,7 @@ export const votersBlockApi = {
     request<Poll[]>("/polls", credentials),
 
   pollByPublicId: (publicId: string) =>
-    request<Poll>(`/polls/${encodeURIComponent(publicId)}`),
+    request<Poll>(`/poll/${encodeURIComponent(publicId)}`),
 
   pollHistory: (credentials: StaffCredentials) =>
     request<Poll[]>("/polls/history", credentials),

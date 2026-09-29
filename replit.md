@@ -14,7 +14,7 @@ Mobile voting and desktop poll-control interface for the existing Voters Block S
 - If the frontend and API share an origin and `/api` is already routed to Spring, the variable may be omitted; the default is `/api`.
 - The Spring server must allow the frontend origin and the `Authorization` and `Content-Type` request headers when hosted on another origin.
 - Admin and staff/operator API calls use HTTP Basic Auth.
-- Voter poll discovery and vote submission are anonymous. The Spring API must permit unauthenticated `GET /api/polls`, `GET /api/polls/{publicId}`, and `POST /api/polls/{pollId}/votes`. The UUID lookup must return the requested poll including `publicId` and `active`.
+- Voter poll discovery and vote submission are anonymous. The Spring API must permit unauthenticated `GET /api/polls`, `GET /api/poll/{publicId}`, and `POST /api/polls/{pollId}/votes`. The UUID lookup must return the requested poll including `publicId` and `active`.
 
 ## Contract source
 

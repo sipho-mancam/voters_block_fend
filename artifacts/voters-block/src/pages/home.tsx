@@ -163,7 +163,7 @@ export default function PublicVoting() {
         )}
 
         <div className="space-y-3">
-          {poll.candidates.map((candidate, index) => {
+          {poll.candidates.map((candidate) => {
             const selected = votePollId === poll.id && currentVote === candidate.id;
             const pending = voteMutation.isPending && pendingCandidate === candidate.id;
             return (
@@ -189,7 +189,7 @@ export default function PublicVoting() {
                 className={`cursor-pointer overflow-hidden rounded-sm border bg-card transition-[border-color,background-color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:-translate-y-0.5 hover:border-foreground/50 hover:shadow-md"}`}
               >
                 <CardContent className="flex items-stretch p-0">
-                  <div className={`flex w-14 items-center justify-center border-r font-display text-3xl font-black sm:w-20 ${selected ? "border-primary bg-primary text-primary-foreground" : "bg-secondary text-white/55"}`}>{String(index + 1).padStart(2, "0")}</div>
+                  <div className={`flex w-14 items-center justify-center border-r font-display text-3xl font-black sm:w-20 ${selected ? "border-primary bg-primary text-primary-foreground" : "bg-secondary text-white/55"}`}>{candidate.jerseyNumber ?? "—"}</div>
                   <div className="min-w-0 flex-1 p-4 sm:px-6">
                     <h3 className="truncate text-2xl font-bold uppercase leading-tight tracking-tight">{candidate.name}</h3>
                     <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{candidateSubtitle(candidate)}</p>
