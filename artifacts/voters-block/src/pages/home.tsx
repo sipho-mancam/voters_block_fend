@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, ShieldCheck, Trophy, WifiOff } from "lucide-react";
 import { Link, useParams } from "wouter";
-import { BackendError, getPollDetails, isValidPublicId, votersBlockApi } from "@/lib/backend-api";
+import { BackendError, candidateSubtitle, getPollDetails, isValidPublicId, votersBlockApi } from "@/lib/backend-api";
 import { useDeviceId } from "@/hooks/use-device-id";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -192,7 +192,7 @@ export default function PublicVoting() {
                   <div className={`flex w-14 items-center justify-center border-r font-display text-3xl font-black sm:w-20 ${selected ? "border-primary bg-primary text-primary-foreground" : "bg-secondary text-white/55"}`}>{String(index + 1).padStart(2, "0")}</div>
                   <div className="min-w-0 flex-1 p-4 sm:px-6">
                     <h3 className="truncate text-2xl font-bold uppercase leading-tight tracking-tight">{candidate.name}</h3>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{candidate.metadata || "Player"}</p>
+                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{candidateSubtitle(candidate)}</p>
                   </div>
                   <div className="flex w-16 items-center justify-center">
                     {pending ? <Loader2 className="animate-spin text-primary" /> : selected ? <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check size={17} /></span> : <span className="h-8 w-8 rounded-full border-2 border-muted-foreground/30" />}

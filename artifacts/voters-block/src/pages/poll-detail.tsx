@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Download, Loader2, Users } from "lucide-react";
 import QRCode from "qrcode";
 import { Link, useParams } from "wouter";
-import { getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
+import { candidateSubtitle, getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -80,11 +80,11 @@ export default function PollDetail() {
       <div className="grid gap-6 xl:grid-cols-3">
         <Card className="rounded-sm border-t-4 border-t-primary xl:col-span-2"><CardHeader><CardTitle className="flex items-center gap-2 uppercase"><Users size={19} /> Results</CardTitle></CardHeader><CardContent>{results.isLoading ? <div className="flex min-h-40 items-center justify-center"><Loader2 className="animate-spin" /></div> : <div className="space-y-5">{[...candidates].sort((a, b) => b.votes - a.votes).map((candidate, index) => {
           const percentage = total ? candidate.votes / total * 100 : 0;
-          return <div key={candidate.id}><div className="mb-2 flex justify-between"><div><strong className="uppercase">{index + 1}. {candidate.name}</strong><p className="font-mono text-xs text-muted-foreground">{candidate.metadata || "Player"}</p></div><div className="text-right"><strong>{Math.round(percentage)}%</strong><p className="font-mono text-xs text-muted-foreground">{candidate.votes} votes</p></div></div><Progress value={percentage} /></div>;
+          return <div key={candidate.id}><div className="mb-2 flex justify-between"><div><strong className="uppercase">{index + 1}. {candidate.name}</strong><p className="font-mono text-xs text-muted-foreground">{candidateSubtitle(candidate)}</p></div><div className="text-right"><strong>{Math.round(percentage)}%</strong><p className="font-mono text-xs text-muted-foreground">{candidate.votes} votes</p></div></div><Progress value={percentage} /></div>;
         })}</div>}</CardContent></Card>
         <div className="space-y-6">
           <Card className="rounded-sm border-secondary bg-secondary text-white"><CardHeader><CardTitle className="text-sm uppercase text-white/60">Total votes</CardTitle></CardHeader><CardContent><p className="font-display text-7xl font-black leading-none text-white">{total}</p></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-sm uppercase">Candidates</CardTitle></CardHeader><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Name</TableHead><TableHead>Votes</TableHead></TableRow></TableHeader><TableBody>{candidates.map((candidate, index) => <TableRow key={candidate.id}><TableCell className="font-black">{index + 1}</TableCell><TableCell><strong className="uppercase">{candidate.name}</strong><p className="font-mono text-[10px] text-muted-foreground">{candidate.metadata}</p></TableCell><TableCell>{candidate.votes}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-sm uppercase">Candidates</CardTitle></CardHeader><CardContent className="p-0"><Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Name</TableHead><TableHead>Votes</TableHead></TableRow></TableHeader><TableBody>{candidates.map((candidate, index) => <TableRow key={candidate.id}><TableCell className="font-black">{index + 1}</TableCell><TableCell><strong className="uppercase">{candidate.name}</strong><p className="font-mono text-[10px] text-muted-foreground">{candidateSubtitle(candidate)}</p></TableCell><TableCell>{candidate.votes}</TableCell></TableRow>)}</TableBody></Table></CardContent></Card>
         </div>
       </div>
     </div>

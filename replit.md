@@ -47,5 +47,5 @@ The original supplied API contract did not describe a token/session endpoint, cu
 
 ## CSV upload
 
-Required headers: `name`, `squadNumber`. Optional headers: `position`, `team`.
-The frontend combines the optional values into the backend candidate `metadata` field.
+Required headers: `name`, `jerseyNumber`, `teamName`. Optional header: `metadata`.
+The frontend validates jersey numbers as non-negative integers and sends these as separate candidate fields.

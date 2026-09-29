@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { AlertTriangle, CheckCircle, FileText, Loader2, Plus, Trash2, Upload, Users } from "lucide-react";
-import { votersBlockApi } from "@/lib/backend-api";
+import { votersBlockApi, type CandidatePayload } from "@/lib/backend-api";
 import { parsePlayerCsv, type ParsedPlayer } from "@/lib/csv-parser";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useStaffSession } from "@/lib/staff-session";
 
-type CandidateInput = { name: string; metadata: string };
+type CandidateInput = { name: string; jerseyNumber: string; teamName: string; metadata: string };
 type CandidateMode = "manual" | "csv";
 
-const emptyCandidate = (): CandidateInput => ({ name: "", metadata: "" });
+const emptyCandidate = (): CandidateInput => ({ name: "", jerseyNumber: "", teamName: "", metadata: "" });
 
 export default function NewPoll() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,9 +31,22 @@ export default function NewPoll() {
 
   const csvCandidates = players.map(toCandidatePayload);
   const candidates = mode === "manual"
-    ? manualCandidates.filter((candidate) => candidate.name.trim()).map((candidate) => ({ name: candidate.name.trim(), metadata: candidate.metadata.trim() || undefined }))
+    ? manualCandidates.filter((candidate) => Object.values(candidate).some((value) => value.trim())).map((candidate) => ({
+      name: candidate.name.trim(),
+      jerseyNumber: Number(candidate.jerseyNumber),
+      teamName: candidate.teamName.trim(),
+      metadata: candidate.metadata.trim() || undefined,
+    }))
     : csvCandidates;
-  const canCreate = details.name.trim() && details.location.trim() && candidates.length > 0;
+  const canCreate = Boolean(
+    details.name.trim() && details.location.trim() && (mode !== "csv" || !error) && candidates.length > 0 &&
+    candidates.every((candidate) =>
+      candidate.name && candidate.teamName && Number.isSafeInteger(candidate.jerseyNumber) && candidate.jerseyNumber >= 0 &&
+      (mode !== "manual" || manualCandidates.every((item) =>
+        !Object.values(item).some((value) => value.trim()) || /^\d+$/.test(item.jerseyNumber.trim())
+      ))
+    )
+  );
 
   const create = useMutation({
     mutationFn: async () => {
@@ -92,18 +105,20 @@ export default function NewPoll() {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <ModeCard active={mode === "manual"} icon={<Users />} title="Add manually" description="Enter each candidate's name and optional information." onClick={() => setMode("manual")} />
+        <ModeCard active={mode === "manual"} icon={<Users />} title="Add manually" description="Enter each candidate's name, jersey number, and team." onClick={() => setMode("manual")} />
         <ModeCard active={mode === "csv"} icon={<Upload />} title="Upload CSV" description="Import a prepared candidate list in one step." onClick={() => setMode("csv")} />
       </div>
 
       {mode === "manual" ? (
         <Card>
-          <CardHeader><CardTitle className="uppercase">Manual candidates</CardTitle><CardDescription>Add at least one candidate. Metadata can contain a position, team, number, or other useful detail.</CardDescription></CardHeader>
+          <CardHeader><CardTitle className="uppercase">Manual candidates</CardTitle><CardDescription>Add at least one candidate. Metadata can describe a position or other useful detail.</CardDescription></CardHeader>
           <CardContent className="space-y-4">
             {manualCandidates.map((candidate, index) => (
-              <div key={index} className="grid items-end gap-3 rounded-lg border p-4 md:grid-cols-[1fr_1fr_auto]">
+              <div key={index} className="grid items-end gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.7fr_1fr_1fr_auto]">
                 <Field label={`Candidate ${index + 1} name`} required><Input value={candidate.name} onChange={(event) => updateCandidate(index, "name", event.target.value)} placeholder="Alex Morgan" /></Field>
-                <Field label="Metadata"><Input value={candidate.metadata} onChange={(event) => updateCandidate(index, "metadata", event.target.value)} placeholder="Forward · No. 9" /></Field>
+                <Field label="Jersey number" required><Input type="number" min="0" step="1" value={candidate.jerseyNumber} onChange={(event) => updateCandidate(index, "jerseyNumber", event.target.value)} placeholder="10" /></Field>
+                <Field label="Team name" required><Input value={candidate.teamName} onChange={(event) => updateCandidate(index, "teamName", event.target.value)} placeholder="North Stars" /></Field>
+                <Field label="Metadata"><Input value={candidate.metadata} onChange={(event) => updateCandidate(index, "metadata", event.target.value)} placeholder="Forward" /></Field>
                 <Button type="button" variant="ghost" size="icon" aria-label={`Remove candidate ${index + 1}`} disabled={manualCandidates.length === 1} onClick={() => setManualCandidates((current) => current.filter((_, candidateIndex) => candidateIndex !== index))}><Trash2 size={18} /></Button>
               </div>
             ))}
@@ -113,7 +128,7 @@ export default function NewPoll() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
-            <CardHeader><CardTitle className="uppercase">Candidate CSV</CardTitle><CardDescription>Required header: name. Optional: metadata, squadNumber, position, team.</CardDescription></CardHeader>
+            <CardHeader><CardTitle className="uppercase">Candidate CSV</CardTitle><CardDescription>Required headers: name, jerseyNumber, teamName. Optional: metadata.</CardDescription></CardHeader>
             <CardContent>
               <input ref={inputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => event.target.files?.[0] && readFile(event.target.files[0])} />
               <button type="button" onClick={() => inputRef.current?.click()} className="flex w-full flex-col items-center rounded-lg border-2 border-dashed p-10 hover:border-primary/60">
@@ -126,7 +141,7 @@ export default function NewPoll() {
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2 uppercase"><FileText size={18} /> Preview</CardTitle></CardHeader>
             <CardContent className="max-h-[420px] overflow-auto p-0">
-              {csvCandidates.length === 0 ? <p className="p-8 text-center font-mono text-sm text-muted-foreground">Upload a CSV to preview candidates.</p> : <Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Name</TableHead><TableHead>Metadata</TableHead></TableRow></TableHeader><TableBody>{csvCandidates.map((candidate, index) => <TableRow key={`${candidate.name}-${index}`}><TableCell className="font-black">{index + 1}</TableCell><TableCell className="font-bold uppercase">{candidate.name}</TableCell><TableCell className="font-mono text-xs text-muted-foreground">{candidate.metadata || "—"}</TableCell></TableRow>)}</TableBody></Table>}
+              {csvCandidates.length === 0 ? <p className="p-8 text-center font-mono text-sm text-muted-foreground">Upload a CSV to preview candidates.</p> : <Table><TableHeader><TableRow><TableHead>#</TableHead><TableHead>Name</TableHead><TableHead>Jersey</TableHead><TableHead>Team</TableHead><TableHead>Metadata</TableHead></TableRow></TableHeader><TableBody>{csvCandidates.map((candidate, index) => <TableRow key={`${candidate.name}-${index}`}><TableCell className="font-black">{index + 1}</TableCell><TableCell className="font-bold uppercase">{candidate.name}</TableCell><TableCell>{candidate.jerseyNumber}</TableCell><TableCell>{candidate.teamName}</TableCell><TableCell className="font-mono text-xs text-muted-foreground">{candidate.metadata || "—"}</TableCell></TableRow>)}</TableBody></Table>}
             </CardContent>
           </Card>
         </div>
@@ -139,10 +154,12 @@ export default function NewPoll() {
   );
 }
 
-function toCandidatePayload(player: ParsedPlayer) {
+function toCandidatePayload(player: ParsedPlayer): CandidatePayload {
   return {
     name: player.name.trim(),
-    metadata: player.metadata?.trim() || [player.position, player.team, player.squadNumber ? `No. ${player.squadNumber}` : ""].filter(Boolean).join(" · ") || undefined,
+    jerseyNumber: player.jerseyNumber,
+    teamName: player.teamName.trim(),
+    metadata: player.metadata?.trim() || undefined,
   };
 }
 

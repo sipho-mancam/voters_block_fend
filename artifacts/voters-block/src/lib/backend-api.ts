@@ -3,8 +3,25 @@ import type { StaffCredentials } from "@/lib/staff-session";
 export interface Candidate {
   id: number;
   name: string;
+  jerseyNumber?: number | null;
+  teamName?: string | null;
   metadata: string | null;
   votes: number;
+}
+
+export interface CandidatePayload {
+  name: string;
+  jerseyNumber: number;
+  teamName: string;
+  metadata?: string;
+}
+
+export function candidateSubtitle(candidate: Candidate): string {
+  return [
+    candidate.teamName,
+    candidate.jerseyNumber != null ? `No. ${candidate.jerseyNumber}` : null,
+    candidate.metadata,
+  ].filter(Boolean).join(" · ") || "Player";
 }
 
 export interface PollDetails {
@@ -116,7 +133,7 @@ export const votersBlockApi = {
   addCandidate: (
     credentials: StaffCredentials,
     pollId: number,
-    candidate: { name: string; metadata?: string },
+    candidate: CandidatePayload,
   ) =>
     request<Candidate>(`/admin/polls/${pollId}/candidates`, credentials, {
       method: "POST",
@@ -126,7 +143,7 @@ export const votersBlockApi = {
   addCandidates: (
     credentials: StaffCredentials,
     pollId: number,
-    candidates: Array<{ name: string; metadata?: string }>,
+    candidates: CandidatePayload[],
   ) =>
     request<Candidate[]>(`/admin/polls/${pollId}/candidates/bulk`, credentials, {
       method: "POST",
@@ -137,7 +154,7 @@ export const votersBlockApi = {
     credentials: StaffCredentials,
     pollId: number,
     candidateId: number,
-    candidate: { name: string; metadata?: string },
+    candidate: CandidatePayload,
   ) =>
     request<Candidate>(`/admin/polls/${pollId}/candidates/${candidateId}`, credentials, {
       method: "PUT",

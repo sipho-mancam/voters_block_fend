@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Activity, ExternalLink, Loader2, PlusSquare, Users } from "lucide-react";
 import { Link } from "wouter";
-import { getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
+import { candidateSubtitle, getPollDetails, isValidPublicId, publicVotingUrl, votersBlockApi } from "@/lib/backend-api";
 import { useStaffSession } from "@/lib/staff-session";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,7 @@ export default function Dashboard() {
                 {results.isLoading ? <CenteredLoader /> : candidates.length === 0 ? <p className="py-12 text-center font-mono text-muted-foreground">No candidates have been uploaded.</p> : (
                   <div className="space-y-6">{[...candidates].sort((a, b) => b.votes - a.votes).map((candidate, index) => {
                     const percentage = total ? candidate.votes / total * 100 : 0;
-                    return <div key={candidate.id}><div className="mb-2 flex items-end justify-between"><div className="flex items-center gap-3"><span className={`flex h-8 w-8 items-center justify-center rounded font-black ${index === 0 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{index + 1}</span><div><p className="font-bold uppercase">{candidate.name}</p><p className="font-mono text-xs text-muted-foreground">{candidate.metadata || "Player"}</p></div></div><div className="text-right"><strong className="text-xl">{Math.round(percentage)}%</strong><p className="font-mono text-xs text-muted-foreground">{candidate.votes} votes</p></div></div><Progress value={percentage} /></div>;
+                    return <div key={candidate.id}><div className="mb-2 flex items-end justify-between"><div className="flex items-center gap-3"><span className={`flex h-8 w-8 items-center justify-center rounded font-black ${index === 0 ? "bg-primary text-primary-foreground" : "bg-muted"}`}>{index + 1}</span><div><p className="font-bold uppercase">{candidate.name}</p><p className="font-mono text-xs text-muted-foreground">{candidateSubtitle(candidate)}</p></div></div><div className="text-right"><strong className="text-xl">{Math.round(percentage)}%</strong><p className="font-mono text-xs text-muted-foreground">{candidate.votes} votes</p></div></div><Progress value={percentage} /></div>;
                   })}</div>
                 )}
               </CardContent>
