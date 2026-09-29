@@ -44,16 +44,17 @@ export default function Dashboard() {
     <div className="space-y-10 pb-12">
       {poll && pollDetails ? (
         <section className="space-y-6">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-            <div><p className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-primary">Live poll</p><h1 className="text-3xl font-black uppercase tracking-tight">{pollDetails.name}</h1><p className="font-mono text-sm text-muted-foreground">{pollDetails.location ? `${pollDetails.location} · ` : ""}Refreshing from the Spring API every five seconds</p></div>
-            <div className="flex gap-2">
+          <div className="broadcast-panel broadcast-rule relative flex flex-col justify-between gap-6 overflow-hidden p-6 sm:flex-row sm:items-end md:p-8">
+            <div className="relative z-10"><p className="mb-3 flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/65"><span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live poll</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight text-white md:text-6xl">{pollDetails.name}</h1><p className="mt-4 font-mono text-xs text-white/55">{pollDetails.location ? `${pollDetails.location} · ` : ""}Results refresh every five seconds</p></div>
+            <div className="relative z-10 flex flex-wrap gap-2">
               {isAdmin && <Button variant="destructive" onClick={() => closePoll.mutate()} disabled={closePoll.isPending} className="clip-diagonal uppercase">{closePoll.isPending && <Loader2 className="mr-2 animate-spin" />}Close poll</Button>}
-              <Link href={`/polls/${poll.id}`} className="inline-flex h-10 items-center rounded-md border px-4 text-sm font-bold uppercase">Details</Link>
-              <a href="/" target="_blank" rel="noreferrer" aria-label="Open public voting page" className="inline-flex h-10 w-10 items-center justify-center rounded-md border"><ExternalLink size={18} /></a>
+              <Link href={`/polls/${poll.id}`} className="inline-flex h-10 items-center border border-white/35 px-4 text-xs font-bold uppercase text-white hover:bg-white hover:text-secondary">Details</Link>
+              <a href="/" target="_blank" rel="noreferrer" aria-label="Open public voting page" className="inline-flex h-10 w-10 items-center justify-center border border-white/35 text-white hover:bg-white hover:text-secondary"><ExternalLink size={18} /></a>
             </div>
+            <span aria-hidden="true" className="pointer-events-none absolute -bottom-20 right-12 font-display text-[16rem] font-black leading-none text-white/[0.04]">S</span>
         </div>
           <div className="grid gap-6 md:grid-cols-3">
-            <Card className="md:col-span-2">
+            <Card className="rounded-sm border-t-4 border-t-primary md:col-span-2">
               <CardHeader><CardTitle className="flex items-center justify-between uppercase">Current standings <span className="h-3 w-3 animate-pulse rounded-full bg-primary" /></CardTitle></CardHeader>
               <CardContent>
                 {results.isLoading ? <CenteredLoader /> : candidates.length === 0 ? <p className="py-12 text-center font-mono text-muted-foreground">No candidates have been uploaded.</p> : (
@@ -64,7 +65,7 @@ export default function Dashboard() {
                 )}
               </CardContent>
             </Card>
-            <Card><CardHeader><CardTitle className="text-sm uppercase text-muted-foreground">Total votes</CardTitle></CardHeader><CardContent><p className="text-5xl font-black">{total}</p><p className="mt-2 flex items-center gap-2 font-mono text-xs text-muted-foreground"><Users size={14} /> LIVE TALLY</p></CardContent></Card>
+            <Card className="rounded-sm bg-secondary text-white"><CardHeader><CardTitle className="text-sm uppercase text-white/60">Total votes</CardTitle></CardHeader><CardContent><p className="font-display text-7xl font-black leading-none text-white">{total}</p><p className="mt-5 flex items-center gap-2 font-mono text-xs text-white/50"><Users size={14} className="text-primary" /> LIVE TALLY</p></CardContent></Card>
           </div>
         </section>
       ) : (
@@ -80,5 +81,5 @@ function Empty({ title, message }: { title: string; message: string }) {
 }
 
 function NoActivePoll({ isAdmin }: { isAdmin: boolean }) {
-  return <section className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card p-8 text-center"><Activity size={40} className="mb-4 text-muted-foreground" /><h1 className="text-2xl font-black uppercase">No active poll</h1><p className="mt-2 max-w-md font-mono text-sm text-muted-foreground">{isAdmin ? "Create a poll and add its candidate list to begin voting." : "There is no live voting session to monitor."}</p>{isAdmin && <Link href="/polls/new" className="clip-diagonal mt-6 inline-flex h-10 items-center gap-2 bg-primary px-4 font-bold uppercase text-primary-foreground"><PlusSquare size={18} /> Create poll</Link>}</section>;
+  return <section className="broadcast-panel broadcast-rule flex min-h-[360px] flex-col items-center justify-center p-8 text-center"><Activity size={40} className="mb-5 text-primary" /><p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-white/50">Match-day control</p><h1 className="text-5xl font-black uppercase text-white">No active poll</h1><p className="mt-3 max-w-md text-sm text-white/60">{isAdmin ? "Create a poll and add its candidate list to begin voting." : "There is no live voting session to monitor."}</p>{isAdmin && <Link href="/polls/new" className="clip-diagonal mt-7 inline-flex h-10 items-center gap-2 bg-primary px-4 font-bold uppercase text-primary-foreground"><PlusSquare size={18} /> Create poll</Link>}</section>;
 }

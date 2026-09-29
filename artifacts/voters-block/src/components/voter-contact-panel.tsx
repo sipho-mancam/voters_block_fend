@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -19,11 +19,9 @@ export function VoterContactPanel() {
         <div className="bg-primary p-6 text-primary-foreground sm:p-8">
           <p className="font-mono text-xs font-bold uppercase tracking-[0.22em] text-primary-foreground/70">Contact us</p>
           <h2 className="mt-2 text-3xl font-black uppercase tracking-tight">Send us a message</h2>
-          <p className="mt-3 text-sm text-primary-foreground/75">Questions about Voters Block or Seb4Vision services? Our team is ready to help.</p>
+          <p className="mt-3 text-sm text-primary-foreground/75">Questions about this vote? Send a message to the Voters Block team.</p>
           <div className="mt-8 space-y-5">
-            <ContactLine icon={<MapPin size={17} />}>345 West Ave, Ferndale, Randburg 2194</ContactLine>
             <ContactLine icon={<Mail size={17} />}><a href="mailto:info@seb4vision.co.za" className="underline underline-offset-4">info@seb4vision.co.za</a></ContactLine>
-            <ContactLine icon={<Phone size={17} />}><a href="tel:+27117870008" className="underline underline-offset-4">+27 11 787 0008</a></ContactLine>
           </div>
         </div>
 
@@ -37,7 +35,7 @@ export function VoterContactPanel() {
             <textarea required maxLength={2000} rows={5} value={form.message} onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))} className="flex w-full rounded-md border border-white/15 bg-white/10 px-3 py-2 text-sm text-white ring-offset-secondary placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
           </Field>
           <Button type="submit" className="clip-diagonal h-11 uppercase"><Send className="mr-2" size={17} /> Send message</Button>
-          <p className="font-mono text-[11px] text-white/50">Opens your email app with the message addressed to Seb4Vision.</p>
+          <p className="font-mono text-[11px] text-white/60">Opens your email app addressed to the support inbox shown here.</p>
         </form>
       </div>
     </section>

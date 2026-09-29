@@ -101,32 +101,36 @@ export default function PublicVoting() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="sticky top-0 z-10 bg-secondary p-4 text-secondary-foreground shadow-md">
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
+      <header className="sticky top-0 z-10 border-b border-white/15 bg-secondary px-4 py-3 text-secondary-foreground shadow-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-4">
-            <BrandLogo variant="white" className="h-9 w-36 sm:w-44" />
-            <div className="hidden border-l border-white/20 pl-4 text-xs font-bold uppercase leading-tight sm:block">
-              Man of the<br /><span className="text-brand-orange">Match</span>
+            <BrandLogo variant="white" className="h-11 w-40 sm:h-12 sm:w-48" />
+            <div className="hidden border-l border-white/25 pl-4 font-display text-base font-bold uppercase leading-none tracking-wide sm:block">
+              Man of the<br /><span className="text-primary">Match</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-2 rounded-full border border-white/30 bg-white/10 px-3 py-1 font-mono text-xs font-bold uppercase text-white shadow-sm sm:flex">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-brand-orange" /> Live
+            <div className="hidden items-center gap-2 border border-primary/60 bg-primary/15 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-white sm:flex">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-primary" /> Live vote
             </div>
             <StaffAccessLink compact />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 p-4 pb-24 md:p-6">
-        <div className="mb-8 mt-4 text-center">
-          <p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">{pollDetails.location || `Poll #${poll.id}`}</p>
-          <h1 className="text-3xl font-black uppercase tracking-tighter md:text-5xl">{pollDetails.name}</h1>
-          <p className="mt-2 font-mono text-sm text-muted-foreground">Your latest selection replaces your previous vote.</p>
+      <main className="w-full flex-1">
+        <div className="broadcast-panel relative overflow-hidden border-b-4 border-primary">
+          <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-24 select-none font-display text-[22rem] font-black leading-none text-white/[0.035] sm:right-[10%]">S</div>
+          <div className="relative mx-auto max-w-3xl px-4 pb-9 pt-10 md:px-6 md:pb-12 md:pt-14">
+            <p className="mb-3 flex items-center gap-3 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-white/60"><span className="h-1.5 w-1.5 bg-primary" />{pollDetails.location || `Poll #${poll.id}`}</p>
+            <h1 className="max-w-2xl text-5xl font-black uppercase leading-[0.92] tracking-tight text-white md:text-7xl">{pollDetails.name}</h1>
+            <p className="mt-6 border-l-2 border-primary pl-3 text-sm text-white/65">Pick your standout player. Your latest selection replaces your previous vote.</p>
+          </div>
         </div>
-
+        <div className="mx-auto max-w-3xl px-4 pb-20 pt-7 md:px-6 md:pt-10">
+        <div className="mb-5 flex items-end justify-between gap-3"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary">The lineup</p><h2 className="text-3xl font-black uppercase leading-none">Cast your vote</h2></div><span className="font-mono text-[11px] text-muted-foreground">{poll.candidates.length} candidates</span></div>
         {currentVote !== null && (
-          <div className="mb-6 flex gap-3 rounded-lg border border-primary/20 bg-primary/10 p-4">
+          <div className="mb-6 flex gap-3 border-l-4 border-primary bg-primary/10 p-4">
             <Check className="mt-0.5 text-primary" />
             <div><p className="font-bold uppercase">Vote registered</p><p className="font-mono text-xs text-muted-foreground">You can change it while voting remains open.</p></div>
           </div>
@@ -155,13 +159,14 @@ export default function PublicVoting() {
                     voteMutation.mutate({ pollId: poll.id, candidateId: candidate.id });
                   }
                 }}
-                className={`cursor-pointer overflow-hidden transition-all ${selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:border-foreground/30"}`}
+                data-testid={`button-vote-candidate-${candidate.id}`}
+                className={`cursor-pointer overflow-hidden rounded-sm border bg-card transition-[border-color,background-color,transform] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:-translate-y-0.5 hover:border-foreground/50 hover:shadow-md"}`}
               >
                 <CardContent className="flex items-stretch p-0">
-                  <div className={`flex w-16 items-center justify-center border-r text-2xl font-black ${selected ? "border-primary bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{index + 1}</div>
-                  <div className="flex-1 p-4">
-                    <h2 className="text-lg font-bold uppercase tracking-tight">{candidate.name}</h2>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">{candidate.metadata || "Player"}</p>
+                  <div className={`flex w-14 items-center justify-center border-r font-display text-3xl font-black sm:w-20 ${selected ? "border-primary bg-primary text-primary-foreground" : "bg-secondary text-white/55"}`}>{String(index + 1).padStart(2, "0")}</div>
+                  <div className="min-w-0 flex-1 p-4 sm:px-6">
+                    <h3 className="truncate text-2xl font-bold uppercase leading-tight tracking-tight">{candidate.name}</h3>
+                    <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{candidate.metadata || "Player"}</p>
                   </div>
                   <div className="flex w-16 items-center justify-center">
                     {pending ? <Loader2 className="animate-spin text-primary" /> : selected ? <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check size={17} /></span> : <span className="h-8 w-8 rounded-full border-2 border-muted-foreground/30" />}
@@ -171,6 +176,7 @@ export default function PublicVoting() {
             );
           })}
         </div>
+        </div>
       </main>
       <VoterContactPanel />
       <SiteFooter />
@@ -179,11 +185,11 @@ export default function PublicVoting() {
 }
 
 function LoadingState() {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex min-h-[65dvh] flex-1 flex-col items-center justify-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" /><p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><VoterContactPanel /><SiteFooter /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-4 py-20"><div className="mb-8 h-3 w-28 animate-pulse bg-muted" /><div className="mb-5 h-14 w-3/4 animate-pulse bg-muted" /><div className="mb-12 h-5 w-1/2 animate-pulse bg-muted" /><div className="space-y-3">{[0, 1, 2].map((item) => <div key={item} className="h-20 animate-pulse border border-border bg-card" />)}</div><p className="mt-8 font-mono text-xs uppercase tracking-widest text-muted-foreground">Connecting to match server</p></div><VoterContactPanel /><SiteFooter /></div>;
 }
 
 function MessageState({ icon, title, message, action }: { icon: React.ReactNode; title: string; message: string; action?: () => void }) {
-  return <div className="flex min-h-[100dvh] flex-col"><div className="relative flex min-h-[65dvh] flex-1 items-center justify-center p-6 text-center"><BrandLogo className="absolute left-4 top-4 h-10 w-40" /><div className="absolute right-4 top-4"><StaffAccessLink /></div><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary text-secondary-foreground/60">{icon}</div><h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1><p className="mt-3 font-mono text-sm text-muted-foreground">{message}</p>{action && <button className="mt-6 font-mono text-sm font-bold uppercase text-primary underline" onClick={action}>Try again</button>}</div></div><VoterContactPanel /><SiteFooter /></div>;
+  return <div className="flex min-h-[100dvh] flex-col"><div className="flex items-center justify-between bg-secondary px-4 py-3"><BrandLogo variant="white" className="h-11 w-44" /><StaffAccessLink compact /></div><div className="flex min-h-[55dvh] flex-1 items-center justify-center p-6 text-center"><div className="max-w-md"><div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center bg-secondary text-primary">{icon}</div><p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-primary">Match-day voting</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight">{title}</h1><p className="mt-5 text-sm leading-relaxed text-muted-foreground">{message}</p>{action && <button className="mt-6 bg-primary px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider text-primary-foreground hover:bg-primary/90" onClick={action}>Try again</button>}</div></div><VoterContactPanel /><SiteFooter /></div>;
 }
 
 function StaffAccessLink({ compact = false }: { compact?: boolean }) {
@@ -192,7 +198,7 @@ function StaffAccessLink({ compact = false }: { compact?: boolean }) {
       href="/login"
       className={`inline-flex items-center justify-center gap-2 rounded-md border font-mono text-xs font-bold uppercase tracking-wider transition-colors ${
         compact
-          ? "h-9 border-white bg-white px-3 text-secondary shadow-sm hover:border-brand-orange hover:bg-brand-orange hover:text-white"
+           ? "h-9 border-white/25 bg-white/10 px-3 text-white hover:border-white hover:bg-white hover:text-secondary"
           : "h-10 border-border bg-card px-4 text-foreground shadow-sm hover:border-primary hover:text-primary"
       }`}
     >

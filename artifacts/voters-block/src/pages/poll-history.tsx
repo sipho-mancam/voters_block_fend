@@ -23,9 +23,9 @@ export default function PollHistory() {
 
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-end justify-between gap-4">
-        <div><p className="mb-1 font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground">Archive</p><h1 className="flex items-center gap-3 text-3xl font-black uppercase tracking-tight"><Archive size={28} /> Previous polls</h1><p className="mt-2 font-mono text-sm text-muted-foreground">Review closed polls and their final voting results.</p></div>
-        <span className="rounded-full bg-muted px-3 py-1 font-mono text-xs font-bold uppercase text-muted-foreground">{previousPolls.length} closed</span>
+      <div className="broadcast-panel broadcast-rule flex flex-wrap items-end justify-between gap-4 p-6 md:p-8">
+        <div><p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">The archive</p><h1 className="flex items-center gap-3 text-5xl font-black uppercase leading-none text-white md:text-6xl"><Archive size={30} className="text-primary" /> Previous polls</h1><p className="mt-3 text-sm text-white/60">Review closed polls and their final voting results.</p></div>
+        <span className="border border-white/25 px-3 py-1 font-mono text-xs font-bold uppercase text-white/70">{previousPolls.length} closed</span>
       </div>
 
       {previousPolls.length === 0 ? (
@@ -36,10 +36,10 @@ export default function PollHistory() {
             const details = getPollDetails(poll);
             const totalVotes = poll.candidates.reduce((sum, candidate) => sum + candidate.votes, 0);
             return (
-              <Card key={poll.id} className="transition-colors hover:border-primary/40">
+              <Card key={poll.id} className="rounded-sm border-t-4 border-t-primary transition-colors hover:border-primary/60">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
-                    <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Poll #{poll.id} · Closed</p><CardTitle className="mt-1 uppercase">{details.name}</CardTitle></div>
+                    <div><p className="font-mono text-[10px] font-bold uppercase tracking-widest text-primary">Poll #{poll.id} · Closed</p><CardTitle className="mt-1 text-2xl uppercase">{details.name}</CardTitle></div>
                     <span className="rounded-full bg-muted px-2 py-1 font-mono text-[10px] font-bold uppercase text-muted-foreground">History</span>
                   </div>
                 </CardHeader>

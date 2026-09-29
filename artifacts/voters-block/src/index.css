@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=DM+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -67,67 +67,68 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Seb4Vision brand palette */
+/* SuperSport match-day palette: broadcast-black chrome, editorial canvas, signal red. */
 :root {
-  --background: 216 33% 98%;
-  --foreground: 218 68% 14%;
+  --background: 210 12% 96%;
+  --foreground: 0 0% 8%;
+
+  --card: 0 0% 99%;
+  --card-foreground: 0 0% 8%;
+  --card-border: 210 8% 84%;
   
-  --card: 0 0% 100%;
-  --card-foreground: 218 68% 14%;
-  --card-border: 216 24% 89%;
+  --popover: 0 0% 99%;
+  --popover-foreground: 0 0% 8%;
+  --popover-border: 210 8% 84%;
   
-  --popover: 0 0% 100%;
-  --popover-foreground: 218 68% 14%;
-  --popover-border: 216 24% 89%;
-  
-  --primary: 218 85% 30%;
+  --primary: 358 83% 52%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 218 68% 14%;
+  --secondary: 0 0% 5%;
   --secondary-foreground: 0 0% 100%;
   
-  --muted: 216 28% 95%;
-  --muted-foreground: 216 12% 43%;
+  --muted: 210 9% 91%;
+  --muted-foreground: 210 5% 39%;
   
-  --accent: 216 28% 95%;
-  --accent-foreground: 218 68% 14%;
+  --accent: 206 100% 95%;
+  --accent-foreground: 207 100% 35%;
   
-  --destructive: 10 72% 52%;
+  --destructive: 358 83% 52%;
   --destructive-foreground: 0 0% 100%;
-  --brand-orange: 10 72% 52%;
+  --brand-orange: 358 83% 52%;
 
-  --border: 216 24% 89%;
-  --input: 216 24% 89%;
-  --ring: 218 85% 30%;
-  
-  --chart-1: 218 85% 30%;
-  --chart-2: 10 72% 52%;
-  --chart-3: 216 12% 55%;
-  --chart-4: 203 72% 42%;
-  --chart-5: 218 68% 14%;
+  --border: 210 8% 84%;
+  --input: 210 8% 80%;
+  --ring: 207 100% 50%;
 
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 218 68% 14%;
-  --sidebar-border: 216 24% 89%;
-  --sidebar-primary: 218 85% 30%;
+  --chart-1: 358 83% 52%;
+  --chart-2: 207 100% 50%;
+  --chart-3: 42 99% 61%;
+  --chart-4: 210 7% 44%;
+  --chart-5: 0 0% 9%;
+
+  --sidebar: 0 0% 5%;
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-primary: 358 83% 52%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 216 33% 96%;
-  --sidebar-accent-foreground: 218 85% 30%;
-  --sidebar-ring: 218 85% 30%;
+  --sidebar-accent: 0 0% 14%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 207 100% 50%;
 
-  --app-font-sans: 'Outfit', sans-serif;
-  --app-font-mono: 'Space Mono', monospace;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-mono: 'IBM Plex Mono', monospace;
+  --app-font-display: 'Barlow Condensed', sans-serif;
   
-  --radius: 0.25rem;
+  --radius: 0.375rem;
 
-  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.05);
-  --shadow-xs: 0px 2px 4px 0px rgba(0,0,0,0.05);
-  --shadow-sm: 0px 4px 8px 0px rgba(0,0,0,0.05);
-  --shadow: 0px 8px 16px 0px rgba(0,0,0,0.05);
-  --shadow-md: 0px 12px 24px 0px rgba(0,0,0,0.05);
-  --shadow-lg: 0px 16px 32px 0px rgba(0,0,0,0.05);
-  --shadow-xl: 0px 24px 48px 0px rgba(0,0,0,0.05);
-  --shadow-2xl: 0px 32px 64px 0px rgba(0,0,0,0.05);
+  --shadow-2xs: 0px 1px 2px rgba(12,12,12,0.05);
+  --shadow-xs: 0px 2px 4px rgba(12,12,12,0.05);
+  --shadow-sm: 0px 4px 8px rgba(12,12,12,0.06);
+  --shadow: 0px 8px 16px rgba(12,12,12,0.07);
+  --shadow-md: 0px 12px 24px rgba(12,12,12,0.08);
+  --shadow-lg: 0px 16px 32px rgba(12,12,12,0.09);
+  --shadow-xl: 0px 24px 48px rgba(12,12,12,0.1);
+  --shadow-2xl: 0px 32px 64px rgba(12,12,12,0.12);
 
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0, 0, 0, 0.03);
@@ -143,51 +144,51 @@
 }
 
 .dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
+  --background: 0 0% 7%;
+  --foreground: 0 0% 96%;
   
-  --card: 222 47% 14%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 33% 20%;
+  --card: 0 0% 11%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 0 0% 23%;
   
-  --popover: 222 47% 14%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 33% 20%;
+  --popover: 0 0% 11%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 0 0% 23%;
   
-  --primary: 214 76% 52%;
+  --primary: 358 83% 52%;
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 217 33% 20%;
-  --secondary-foreground: 210 40% 98%;
+  --secondary: 0 0% 16%;
+  --secondary-foreground: 0 0% 96%;
   
-  --muted: 217 33% 20%;
-  --muted-foreground: 215 20% 65%;
+  --muted: 0 0% 17%;
+  --muted-foreground: 0 0% 66%;
   
-  --accent: 217 33% 20%;
-  --accent-foreground: 210 40% 98%;
+  --accent: 207 100% 20%;
+  --accent-foreground: 0 0% 98%;
   
-  --destructive: 10 72% 56%;
-  --destructive-foreground: 210 40% 98%;
-  --brand-orange: 10 72% 56%;
+  --destructive: 358 83% 56%;
+  --destructive-foreground: 0 0% 98%;
+  --brand-orange: 358 83% 56%;
   
-  --border: 217 33% 20%;
-  --input: 217 33% 20%;
-  --ring: 214 76% 52%;
+  --border: 0 0% 23%;
+  --input: 0 0% 28%;
+  --ring: 207 100% 50%;
 
-  --chart-1: 214 76% 52%;
-  --chart-2: 10 72% 56%;
-  --chart-3: 215 20% 65%;
-  --chart-4: 217 33% 20%;
-  --chart-5: 0 62.8% 50%;
+  --chart-1: 358 83% 52%;
+  --chart-2: 207 100% 50%;
+  --chart-3: 42 99% 61%;
+  --chart-4: 0 0% 66%;
+  --chart-5: 0 0% 95%;
 
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 217 33% 20%;
-  --sidebar-primary: 214 76% 52%;
+  --sidebar: 0 0% 5%;
+  --sidebar-foreground: 0 0% 96%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-primary: 358 83% 52%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 20%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 214 76% 52%;
+  --sidebar-accent: 0 0% 14%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 207 100% 50%;
 
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255, 255, 255, 0.04);
@@ -217,11 +218,18 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
+    font-family: var(--app-font-display);
     @apply font-bold tracking-tight uppercase;
   }
 }
 
 @layer utilities {
+  .font-display { font-family: var(--app-font-display); }
+  .broadcast-panel {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+  }
+  .broadcast-rule { border-top: 3px solid hsl(var(--primary)); }
   .clip-diagonal {
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }

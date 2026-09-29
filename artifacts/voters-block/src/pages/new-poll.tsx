@@ -79,9 +79,9 @@ export default function NewPoll() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 pb-12">
-      <div><h1 className="text-3xl font-black uppercase tracking-tight">Create poll</h1><p className="font-mono text-sm text-muted-foreground">Add the new poll details, then enter candidates manually or import them from CSV.</p></div>
+      <div className="broadcast-panel broadcast-rule p-6 md:p-8"><p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">Match-day setup</p><h1 className="text-5xl font-black uppercase leading-none tracking-tight text-white md:text-6xl">Create poll</h1><p className="mt-4 text-sm text-white/60">Add the poll details, then enter candidates manually or import them from CSV.</p></div>
 
-      <Card>
+      <Card className="rounded-sm border-t-4 border-t-primary">
         <CardHeader><CardTitle className="uppercase">Poll information</CardTitle><CardDescription>These details are included in the new API poll contract.</CardDescription></CardHeader>
         <CardContent className="grid gap-5 md:grid-cols-2">
           <Field label="Poll name" required><Input value={details.name} onChange={(event) => setDetails((current) => ({ ...current, name: event.target.value }))} placeholder="Community poll" /></Field>

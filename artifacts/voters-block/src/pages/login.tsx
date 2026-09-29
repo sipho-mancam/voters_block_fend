@@ -38,16 +38,17 @@ export default function Login() {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <div className="flex-1 md:grid md:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-secondary p-12 text-secondary-foreground md:flex md:flex-col md:justify-between">
+       <div className="relative hidden overflow-hidden border-t-4 border-primary bg-secondary p-12 text-secondary-foreground md:flex md:flex-col md:justify-between">
         <BrandLogo variant="white" className="h-16 w-72" />
-        <div><h1 className="text-5xl font-black uppercase tracking-tighter">Match-day<br />control room</h1></div>
+         <div className="relative z-10"><p className="mb-5 font-mono text-xs font-bold uppercase tracking-[0.25em] text-white/50">Voters Block / Staff portal</p><h1 className="max-w-lg text-7xl font-black uppercase leading-[0.9] tracking-tighter">Match-day<br /><span className="text-primary">control</span><br />room.</h1><p className="mt-8 max-w-sm text-sm leading-relaxed text-white/60">Run the vote. Watch the numbers. Give the fans their voice.</p></div>
+         <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -right-20 font-display text-[25rem] font-black leading-none text-white/[0.035]">S</div>
       </div>
-      <div className="flex items-center justify-center p-6 md:p-12">
+       <div className="flex items-center justify-center p-6 py-12 md:p-12">
         <div className="w-full max-w-lg">
-          <div className="mb-10 md:hidden"><BrandLogo className="h-14 w-64" /></div>
+           <div className="mb-10 -mx-6 -mt-12 border-b border-white/15 bg-secondary px-6 py-5 md:hidden"><BrandLogo variant="white" className="h-12 w-52" /></div>
           {!selectedRole ? (
             <>
-              <h2 className="text-3xl font-black uppercase tracking-tight">Staff access</h2>
+               <p className="mb-2 font-mono text-xs font-bold uppercase tracking-[0.2em] text-primary">Secure access</p><h2 className="text-4xl font-black uppercase tracking-tight">Choose your role</h2><p className="mt-2 text-sm text-muted-foreground">Sign in to manage match-day voting.</p>
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <AccessCard icon={<ShieldCheck />} title="Admin" description="Create polls, upload candidates, and control voting." onClick={() => setSelectedRole("ADMIN")} />
                 <AccessCard icon={<Users />} title="Staff" description="Monitor active polls and live match results." onClick={() => setSelectedRole("STAFF")} />
